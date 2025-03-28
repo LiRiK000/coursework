@@ -1,14 +1,9 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
+import ReactDOM from 'react-dom/client';
 
-import "./index.css";
+import './index.css';
+import { Landing } from './pages/Landing';
 
-const App = () => (
-  <div className="container">
-    <div>Name: landing</div>
-    <div>Framework: react-18</div>
-  </div>
-);
+const App = () => <Landing />;
 
-const root = ReactDOM.createRoot(document.getElementById("app") as HTMLElement);
+const root = ReactDOM.createRoot(document.getElementById('app') as HTMLElement);
 root.render(<App />);
