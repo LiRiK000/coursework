@@ -1,10 +1,40 @@
+@font-face {
+  font-family: SkillHorizon;
+  src: url('../shared/fonts/JetBrainsMono-Regular.ttf') format('ttf');
+}
+
 html,
 body,
 #app {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  font-family: Arial, Helvetica, sans-serif; /* TODO Найти кастомный прикольный шрифт */
+  font-family: SkillHorizon, Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
+}
+
+[class^='ant-'] {
+  scrollbar-width: auto !important;
+  font-family: inherit;
+}
+
+*::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: none;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #fefefe;
+  border-radius: 99px;
+  cursor: pointer;
+  user-select: none;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }
