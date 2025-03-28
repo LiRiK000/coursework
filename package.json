@@ -2,6 +2,9 @@
   "private": true,
   "name": "coursework",
   "version": "1.0.0",
+  "scripts": {
+    "start": "pnpm run --stream -r start"
+  },
   "devDependencies": {
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",

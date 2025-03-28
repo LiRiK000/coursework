@@ -1,20 +1,10 @@
 import * as classes from './Landing.module.scss';
+import { Menu } from 'core/widgets/Menu';
 
 export const Landing = () => {
   return (
     <div className={classes.container}>
-      {/* Header */}
-      <header className={classes.header}>
-        <div className={classes.logo}>Skill Horizon</div>
-        <nav className={classes.nav}>
-          <a href="#features">Особенности</a>
-          <a href="#courses">Курсы</a>
-          <a href="#test">Тестирование</a>
-          <a href="#contact">Контакты</a>
-        </nav>
-        <button className={classes.signIn}>Войти</button>
-      </header>
-
+      <Menu />
       {/* Hero Section */}
       <section className={classes.hero}>
         <div className={classes.heroContent}>
