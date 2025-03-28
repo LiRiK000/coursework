@@ -4,5 +4,5 @@ export const mfConfig = {
   exposes: {
     './LandingPage': './src/pages/Landing',
   },
-  shared: ['react', 'react-dom'],
+  shared: ['react', 'react-dom', 'antd', 'zustand'],
 };

@@ -1,5 +1,5 @@
 export const mfConfig = {
-  name: "courses",
+  name: 'courses',
   exposes: {},
-  shared: ["react", "react-dom"],
+  shared: ['react', 'react-dom', 'antd', 'zustand'],
 };

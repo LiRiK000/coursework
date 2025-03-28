@@ -48,6 +48,10 @@ export default defineConfig({
         type: 'css',
       },
       {
+        test: /\.scss$/,
+        use: ['style-loader', 'css-loader', 'sass-loader'],
+      },
+      {
         test: /\.(jsx?|tsx?)$/,
         use: [
           {

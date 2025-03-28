@@ -4,5 +4,5 @@ export const mfConfig = {
     landing: 'landing@http://localhost:3001/remoteEntry.js',
   },
   exposes: {},
-  shared: ['react', 'react-dom'],
+  shared: ['react', 'react-dom', 'antd', 'zustand'],
 };

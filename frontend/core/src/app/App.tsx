@@ -1,4 +1,4 @@
-import './global.css';
+import './global.scss';
 import ReactDOM from 'react-dom/client';
 import { CoreRouter } from './router';
 import { ConfigProvider } from 'antd';
