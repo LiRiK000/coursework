@@ -1,6 +1,8 @@
-// TODO: Доделать interceptor-ы
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 
-import axios, { AxiosError } from 'axios';
+interface CustomAxiosRequestConfig extends AxiosRequestConfig {
+  _retry?: boolean;
+}
 
 const API_BASE_URL = 'http://localhost:3001/api';
 
@@ -9,58 +11,25 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (token: string) => void;
-  reject: (error: AxiosError | unknown) => void;
-}> = [];
-
-const processQueue = (
-  error: AxiosError | unknown | null = null,
-  token: string | null = null,
-) => {
-  failedQueue.forEach((promise) => {
-    if (error) {
-      promise.reject(error);
-    } else {
-      promise.resolve(token!);
-    }
-  });
-  failedQueue = [];
-};
-
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
+      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );
 
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config!;
-    if (error.response?.status === 401) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return api(originalRequest);
-          })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
-      }
+    const originalRequest = error.config as CustomAxiosRequestConfig;
 
-      isRefreshing = true;
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
       try {
         const refreshToken = localStorage.getItem('refreshToken');
@@ -70,19 +39,17 @@ api.interceptors.response.use(
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', newRefreshToken);
 
+        originalRequest.headers = originalRequest.headers || {};
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        processQueue(null, accessToken);
 
         return api(originalRequest);
       } catch (refreshError) {
-        processQueue(refreshError, null);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
       }
     }
+
     return Promise.reject(error);
   },
 );
