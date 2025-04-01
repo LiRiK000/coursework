@@ -1,6 +1,7 @@
 import { links } from './constants';
 import classes from './Menu.module.scss';
 import { Typography } from 'antd';
+import { Profile } from '../../shared/ui/Profile/Profile';
 
 export const Menu = () => {
   // TODO useAuth
@@ -22,7 +23,8 @@ export const Menu = () => {
           </Typography.Link>
         ))}
       </nav>
-      <button className={classes.signIn}>Войти</button>
+      {/* <button className={classes.signIn}>Войти</button> */}
+      <Profile />
     </header>
   );
 };

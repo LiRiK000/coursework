@@ -1,8 +1,9 @@
-import { FC } from 'react';
-import { Form, Input } from 'antd';
-import { Controller } from 'react-hook-form';
-import { AuthModalType } from '../../model/modalType';
 import { ControlType, FieldErrorType } from '../../model/types';
+import { Form, Input } from 'antd';
+
+import { AuthModalType } from '../../model/modalType';
+import { Controller } from 'react-hook-form';
+import { FC } from 'react';
 
 interface AuthModalFormFieldsProps {
   type: AuthModalType;
@@ -18,20 +19,16 @@ export const AuthModalFormFields: FC<AuthModalFormFieldsProps> = ({
   return (
     <>
       <Form.Item
-        label="Имя пользователя"
-        validateStatus={errors.username ? 'error' : ''}
-        help={errors.username?.message}
+        label="Email"
+        validateStatus={errors.email ? 'error' : ''}
+        help={errors.email?.message}
       >
         <Controller
-          name="username"
+          name="email"
           control={control}
           defaultValue=""
           render={({ field }) => (
-            <Input
-              placeholder="Введите имя пользователя"
-              {...field}
-              allowClear
-            />
+            <Input placeholder="Введите email" {...field} allowClear />
           )}
         />
       </Form.Item>

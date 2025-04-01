@@ -1,12 +1,12 @@
-import { useAuthModal } from '@/features/Auth';
+import { AuthModalType, useAuthModal } from '@/features/Auth';
 import classes from './Landing.module.scss';
-import { Menu } from '@/shared/ui/Menu';
+import { Menu } from '@/widgets/Menu';
 
 export const Landing = () => {
   const { openAuthModal } = useAuthModal();
 
   const handleClick = () => {
-    openAuthModal();
+    openAuthModal(AuthModalType.LOGIN);
   };
 
   return (
