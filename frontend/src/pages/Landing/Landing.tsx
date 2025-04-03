@@ -1,6 +1,8 @@
 import { AuthModalType, useAuthModal } from '@/features/Auth';
 import classes from './Landing.module.scss';
 import { Menu } from '@/widgets/Menu';
+import axios from 'axios';
+import { api } from '@/shared/api';
 
 export const Landing = () => {
   const { openAuthModal } = useAuthModal();
@@ -49,13 +51,118 @@ export const Landing = () => {
         </div>
       </section>
 
-      {/* Курсы */}
+      {/* Курсы убрать потом */}
       <section id="courses" className={classes.courses}>
         <h2>Популярные курсы</h2>
         <div className={classes.courseList}>
-          <div className={classes.courseItem}>Основы программирования</div>
-          <div className={classes.courseItem}>Веб-разработка</div>
-          <div className={classes.courseItem}>Анализ данных</div>
+          <div className={classes.courseItem}>
+            <div>Основы программирования</div>
+            <button
+              className={classes.getCertificate}
+              onClick={async () => {
+                try {
+                  const response = await axios.post(
+                    'http://localhost:3000/api/certificates/generate',
+                    {
+                      email: 'test@example.com',
+                      courseName: 'Основы программирования',
+                    },
+                    {
+                      responseType: 'blob',
+                      withCredentials: true,
+                    },
+                  );
+
+                  const url = window.URL.createObjectURL(
+                    new Blob([response.data]),
+                  );
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.setAttribute('download', 'certificate.pdf');
+                  document.body.appendChild(link);
+                  link.click();
+                  link.remove();
+                } catch (error) {
+                  console.error('Ошибка при получении сертификата:', error);
+                  alert('Ошибка при получении сертификата');
+                }
+              }}
+            >
+              Получить сертификат
+            </button>
+          </div>
+          <div className={classes.courseItem}>
+            <div>Веб-разработка</div>
+            <button
+              className={classes.getCertificate}
+              onClick={async () => {
+                try {
+                  const response = await axios.post(
+                    'http://localhost:3000/api/certificates/generate',
+                    {
+                      email: 'test@example.com',
+                      courseName: 'Веб-разработка',
+                    },
+                    {
+                      responseType: 'blob',
+                      withCredentials: true,
+                    },
+                  );
+
+                  const url = window.URL.createObjectURL(
+                    new Blob([response.data]),
+                  );
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.setAttribute('download', 'certificate.pdf');
+                  document.body.appendChild(link);
+                  link.click();
+                  link.remove();
+                } catch (error) {
+                  console.error('Ошибка при получении сертификата:', error);
+                  alert('Ошибка при получении сертификата');
+                }
+              }}
+            >
+              Получить сертификат
+            </button>
+          </div>
+          <div className={classes.courseItem}>
+            <div>Анализ данных</div>
+            <button
+              className={classes.getCertificate}
+              onClick={async () => {
+                try {
+                  const response = await api.post(
+                    '/certificates/generate',
+                    {
+                      email: 'test@example.com',
+                      courseName: 'Анализ данных',
+                    },
+                    {
+                      responseType: 'blob',
+                      withCredentials: true,
+                    },
+                  );
+
+                  const url = window.URL.createObjectURL(
+                    new Blob([response.data]),
+                  );
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.setAttribute('download', 'certificate.pdf');
+                  document.body.appendChild(link);
+                  link.click();
+                  link.remove();
+                } catch (error) {
+                  console.error('Ошибка при получении сертификата:', error);
+                  alert('Ошибка при получении сертификата');
+                }
+              }}
+            >
+              Получить сертификат
+            </button>
+          </div>
         </div>
       </section>
 

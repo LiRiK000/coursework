@@ -40,13 +40,6 @@ const authApi = {
 export const useAuth = () => {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
-    onSuccess: (data) => {
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-      api.defaults.headers.common[
-        'Authorization'
-      ] = `Bearer ${data.accessToken}`;
-    },
     onError: (error: AxiosError) => {
       return {
         message: error.message || 'Ошибка при входе в систему',
@@ -56,30 +49,19 @@ export const useAuth = () => {
 
   const registerMutation = useMutation({
     mutationFn: authApi.register,
-    onSuccess: (data) => {
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-      api.defaults.headers.common[
-        'Authorization'
-      ] = `Bearer ${data.accessToken}`;
-    },
   });
 
   const refreshMutation = useMutation({
     mutationFn: authApi.refresh,
-    onSuccess: (data) => {
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-      api.defaults.headers.common[
-        'Authorization'
-      ] = `Bearer ${data.accessToken}`;
-    },
   });
 
-  const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    delete api.defaults.headers.common['Authorization'];
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout');
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Ошибка при выходе:', error);
+    }
   };
 
   return {

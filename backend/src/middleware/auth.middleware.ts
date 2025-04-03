@@ -23,13 +23,11 @@ export const protect = async (
   next: NextFunction,
 ) => {
   try {
-    // Получаем токен из заголовка
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer')) {
+    // Получаем токен из куков
+    const token = req.cookies.accessToken;
+    if (!token) {
       throw new AppError('Не предоставлен токен авторизации', 401);
     }
-
-    const token = authHeader.split(' ')[1];
 
     // Верифицируем токен
     const decoded = jwt.verify(

@@ -32,10 +32,27 @@ const createSendTokens = async (
     data: { refreshToken },
   });
 
+  // Настройка куков
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict' as const,
+    path: '/',
+  };
+
+  // Установка куков
+  res.cookie('accessToken', accessToken, {
+    ...cookieOptions,
+    maxAge: 15 * 60 * 1000, // 15 минут
+  });
+
+  res.cookie('refreshToken', refreshToken, {
+    ...cookieOptions,
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
+  });
+
   res.status(statusCode).json({
     status: 'success',
-    accessToken,
-    refreshToken,
     data: {
       user: {
         id: user.id,
