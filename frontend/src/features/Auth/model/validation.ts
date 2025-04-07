@@ -1,5 +1,5 @@
-import { AuthModalType } from './modalType';
 import { z } from 'zod';
+import { AuthModalType } from './types';
 
 export const authSchema = (type: AuthModalType) =>
   z

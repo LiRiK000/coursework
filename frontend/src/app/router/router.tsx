@@ -4,6 +4,8 @@ import { Route, BrowserRouter, Routes } from 'react-router-dom';
 import { ProtectedWrapper } from '../providers/ProtectedWrapper';
 import { Main } from '@/pages/Main';
 import { Profile } from '@/pages/Profile';
+import { Suspense } from 'react';
+import { Loader } from '@/shared/ui/Loader';
 
 export const CoreRouter = () => (
   <BrowserRouter>
@@ -13,7 +15,9 @@ export const CoreRouter = () => (
         path="/main"
         element={
           <ProtectedWrapper>
-            <Main />
+            <Suspense fallback={<Loader fullscreen />}>
+              <Main />
+            </Suspense>
           </ProtectedWrapper>
         }
       />
@@ -21,7 +25,9 @@ export const CoreRouter = () => (
         path="/me"
         element={
           <ProtectedWrapper>
-            <Profile />
+            <Suspense fallback={<Loader fullscreen />}>
+              <Profile />
+            </Suspense>
           </ProtectedWrapper>
         }
       />

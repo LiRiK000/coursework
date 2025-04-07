@@ -1,36 +1,31 @@
-import { AuthModalType } from '../model/modalType';
-import { useAuth } from '../api/auth';
-import { useAuthForm } from './useAuthForm';
-import { useAuthModal } from './useAuthModal';
+import { useMutation } from '@tanstack/react-query';
+import { authApi } from '../api/authApi';
+import { AxiosError } from 'axios';
 
-export const useAuthQuery = (type: AuthModalType) => {
-  const { closeAuthModal } = useAuthModal();
-  const { login, register, isLoading, error } = useAuth();
-  const { control, handleSubmit, errors, reset } = useAuthForm(type);
+export const useAuthQuery = () => {
+  const loginMutation = useMutation({
+    mutationFn: authApi.login,
+    onError: (error: AxiosError) => {
+      return {
+        message: error.message || 'Ошибка при входе в систему',
+      };
+    },
+  });
 
-  const onSubmit = async (data: {
-    email: string;
-    password: string;
-    confirmPassword?: string;
-  }) => {
-    try {
-      if (type === AuthModalType.LOGIN) {
-        login({ email: data.email, password: data.password });
-      } else {
-        register(data);
-      }
-      reset();
-      closeAuthModal();
-    } catch (error) {
-      console.error('Ошибка авторизации:', error);
-    }
-  };
+  const registerMutation = useMutation({
+    mutationFn: authApi.register,
+    onError: (error: AxiosError) => {
+      return {
+        message: error.message || 'Ошибка при попытке регистрации',
+      };
+    },
+  });
 
   return {
-    control,
-    handleSubmit: handleSubmit((data) => onSubmit(data)),
-    errors,
-    isLoading,
-    error,
+    login: loginMutation.mutate,
+    register: registerMutation.mutate,
+    mutationSuccess: loginMutation.isSuccess || registerMutation.isSuccess,
+    isLoading: loginMutation.isPending || registerMutation.isPending,
+    mutationError: loginMutation.error || registerMutation.error,
   };
 };

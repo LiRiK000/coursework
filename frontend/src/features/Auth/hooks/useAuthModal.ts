@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { AuthModalType } from '../model/modalType';
+import { AuthModalType } from '../model/types';
 
 type State = {
   isOpen: boolean;

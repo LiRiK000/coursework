@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/shared/api';
 import classes from './Profile.module.scss';
+import { Loader } from '../Loader';
 
 interface User {
   avatar: string | null;
@@ -19,8 +20,7 @@ export const Profile = () => {
     queryKey: ['profile'],
     queryFn: getProfile,
   });
-  if (isLoading) return null;
-  console.log(user?.avatar);
+  if (isLoading) return <Loader />;
   return (
     <Avatar
       className={classes.profile}
