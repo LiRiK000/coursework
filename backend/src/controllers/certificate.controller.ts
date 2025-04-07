@@ -9,6 +9,10 @@ export const generateCertificate = async (
 ) => {
   try {
     const { email, courseName } = req.body;
+    if (!req.user || !req.user.fullname) {
+      throw new AppError('User data is not available', 401);
+    }
+    const { fullname } = req.user;
 
     if (!email || !courseName) {
       throw new AppError('Не предоставлены необходимые данные', 400);
@@ -17,6 +21,7 @@ export const generateCertificate = async (
     const certificateData = {
       email,
       courseName,
+      fullname,
       completionDate: new Date(),
     };
 

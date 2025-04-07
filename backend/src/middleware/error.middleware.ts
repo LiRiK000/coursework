@@ -9,6 +9,8 @@ export class AppError extends Error {
     this.statusCode = statusCode;
     this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
 
+    Object.setPrototypeOf(this, new.target.prototype);
+
     Error.captureStackTrace(this, this.constructor);
   }
 }
@@ -17,7 +19,7 @@ export const errorHandler = (
   err: AppError,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';

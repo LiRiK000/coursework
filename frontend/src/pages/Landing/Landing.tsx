@@ -1,8 +1,11 @@
 import { AuthModalType, useAuthModal } from '@/features/Auth';
-import classes from './Landing.module.scss';
 import { Menu } from '@/widgets/Menu';
-import axios from 'axios';
 import { api } from '@/shared/api';
+import { Button, Typography, Layout, Space, Card, Row, Col } from 'antd';
+import styles from './Landing.module.scss';
+
+const { Title, Paragraph, Text } = Typography;
+const { Content, Footer } = Layout;
 
 export const Landing = () => {
   const { openAuthModal } = useAuthModal();
@@ -12,179 +15,159 @@ export const Landing = () => {
   };
 
   return (
-    <div className={classes.container}>
+    <Layout>
       <Menu />
-      {/* Hero Section */}
-      <section className={classes.hero}>
-        <div className={classes.heroContent}>
-          <h1>Открой новые горизонты знаний</h1>
-          <p>
-            Skill Horizon — это онлайн-платформа для обучения и тестирования
-            знаний. Развивай навыки, проходи курсы и проверяй свои знания в
-            интерактивном формате.
-          </p>
-          <button className={classes.getStarted} onClick={handleClick}>
-            Начать обучение
-          </button>
-        </div>
-        <div className={classes.heroImage}>
-          {/* Можно вставить изображение или иллюстрацию */}
-        </div>
-      </section>
+      <Content>
+        <Row
+          justify="space-between"
+          align="middle"
+          style={{ width: '100%' }}
+          className={styles.hero}
+          gutter={[32, 32]}
+        >
+          <Col xs={24} md={12}>
+            <Space direction="vertical" size="large">
+              <Title level={1}>Открой новые горизонты знаний</Title>
+              <Paragraph>
+                Skill Horizon — это онлайн-платформа для обучения и тестирования
+                знаний. Развивай навыки, проходи курсы и проверяй свои знания в
+                интерактивном формате.
+              </Paragraph>
+              <Button type="primary" size="large" onClick={handleClick}>
+                Начать обучение
+              </Button>
+            </Space>
+          </Col>
+          <Col xs={24} md={12}>
+            <div className={styles.heroImage} />
+          </Col>
+        </Row>
 
-      {/* Особенности */}
-      <section id="features" className={classes.features}>
-        <h2>Особенности</h2>
-        <div className={classes.featureList}>
-          <div className={classes.featureItem}>
-            <h3>Интерактивное обучение</h3>
-            <p>Практические задания и тесты для закрепления знаний.</p>
-          </div>
-          <div className={classes.featureItem}>
-            <h3>Адаптивные курсы</h3>
-            <p>Программа, подстраивающаяся под ваш уровень подготовки.</p>
-          </div>
-          <div className={classes.featureItem}>
-            <h3>Система достижений</h3>
-            <p>Получай баллы, сертификаты и делись успехами с друзьями.</p>
-          </div>
-        </div>
-      </section>
+        <section id="features">
+          <Title level={2} style={{ textAlign: 'center' }}>
+            Особенности
+          </Title>
+          <Row gutter={[32, 32]} justify="center">
+            <Col xs={24} sm={8}>
+              <Card hoverable>
+                <Title level={3}>Интерактивное обучение</Title>
+                <Text>
+                  Практические задания и тесты для закрепления знаний.
+                </Text>
+              </Card>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Card hoverable>
+                <Title level={3}>Адаптивные курсы</Title>
+                <Text>
+                  Программа, подстраивающаяся под ваш уровень подготовки.
+                </Text>
+              </Card>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Card hoverable>
+                <Title level={3}>Система достижений</Title>
+                <Text>
+                  Получай баллы, сертификаты и делись успехами с друзьями.
+                </Text>
+              </Card>
+            </Col>
+          </Row>
+        </section>
 
-      {/* Курсы убрать потом */}
-      <section id="courses" className={classes.courses}>
-        <h2>Популярные курсы</h2>
-        <div className={classes.courseList}>
-          <div className={classes.courseItem}>
-            <div>Основы программирования</div>
-            <button
-              className={classes.getCertificate}
-              onClick={async () => {
-                try {
-                  const response = await axios.post(
-                    'http://localhost:3000/api/certificates/generate',
-                    {
-                      email: 'test@example.com',
-                      courseName: 'Основы программирования',
-                    },
-                    {
-                      responseType: 'blob',
-                      withCredentials: true,
-                    },
-                  );
+        {/* Курсы */}
+        <section id="courses">
+          <Title level={2} style={{ textAlign: 'center' }}>
+            Популярные курсы
+          </Title>
+          <Row gutter={[32, 32]} justify="center">
+            {['Основы программирования', 'Веб-разработка', 'Анализ данных'].map(
+              (course) => (
+                <Col xs={24} sm={8} key={course}>
+                  <Card
+                    hoverable
+                    actions={[
+                      <Button
+                        type="primary"
+                        onClick={async () => {
+                          try {
+                            const response = await api.post(
+                              '/certificates/generate',
+                              {
+                                email: 'test@example.com',
+                                courseName: course,
+                              },
+                              {
+                                responseType: 'blob',
+                                withCredentials: true,
+                              },
+                            );
 
-                  const url = window.URL.createObjectURL(
-                    new Blob([response.data]),
-                  );
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.setAttribute('download', 'certificate.pdf');
-                  document.body.appendChild(link);
-                  link.click();
-                  link.remove();
-                } catch (error) {
-                  console.error('Ошибка при получении сертификата:', error);
-                  alert('Ошибка при получении сертификата');
-                }
-              }}
-            >
-              Получить сертификат
-            </button>
-          </div>
-          <div className={classes.courseItem}>
-            <div>Веб-разработка</div>
-            <button
-              className={classes.getCertificate}
-              onClick={async () => {
-                try {
-                  const response = await axios.post(
-                    'http://localhost:3000/api/certificates/generate',
-                    {
-                      email: 'test@example.com',
-                      courseName: 'Веб-разработка',
-                    },
-                    {
-                      responseType: 'blob',
-                      withCredentials: true,
-                    },
-                  );
+                            const url = window.URL.createObjectURL(
+                              new Blob([response.data]),
+                            );
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.setAttribute('download', 'certificate.pdf');
+                            document.body.appendChild(link);
+                            link.click();
+                            link.remove();
+                          } catch (error) {
+                            console.error(
+                              'Ошибка при получении сертификата:',
+                              error,
+                            );
+                          }
+                        }}
+                      >
+                        Получить сертификат
+                      </Button>,
+                    ]}
+                  >
+                    <Card.Meta title={course} />
+                  </Card>
+                </Col>
+              ),
+            )}
+          </Row>
+        </section>
 
-                  const url = window.URL.createObjectURL(
-                    new Blob([response.data]),
-                  );
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.setAttribute('download', 'certificate.pdf');
-                  document.body.appendChild(link);
-                  link.click();
-                  link.remove();
-                } catch (error) {
-                  console.error('Ошибка при получении сертификата:', error);
-                  alert('Ошибка при получении сертификата');
-                }
-              }}
-            >
-              Получить сертификат
-            </button>
-          </div>
-          <div className={classes.courseItem}>
-            <div>Анализ данных</div>
-            <button
-              className={classes.getCertificate}
-              onClick={async () => {
-                try {
-                  const response = await api.post(
-                    '/certificates/generate',
-                    {
-                      email: 'test@example.com',
-                      courseName: 'Анализ данных',
-                    },
-                    {
-                      responseType: 'blob',
-                      withCredentials: true,
-                    },
-                  );
-
-                  const url = window.URL.createObjectURL(
-                    new Blob([response.data]),
-                  );
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.setAttribute('download', 'certificate.pdf');
-                  document.body.appendChild(link);
-                  link.click();
-                  link.remove();
-                } catch (error) {
-                  console.error('Ошибка при получении сертификата:', error);
-                  alert('Ошибка при получении сертификата');
-                }
-              }}
-            >
-              Получить сертификат
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Тестирование */}
-      <section id="test" className={classes.test}>
-        <h2>Проверь свои знания</h2>
-        <p>Пройди тест и получи мгновенную обратную связь по результатам.</p>
-        <button className={classes.startTest}>Пройти тест</button>
-      </section>
+        {/* Тестирование */}
+        <section id="test" style={{ textAlign: 'center' }}>
+          <Space direction="vertical" size="large">
+            <Title level={2}>Проверь свои знания</Title>
+            <Paragraph>
+              Пройди тест и получи мгновенную обратную связь по результатам.
+            </Paragraph>
+            <Button type="primary" size="large">
+              Пройти тест
+            </Button>
+          </Space>
+        </section>
+      </Content>
 
       {/* Footer */}
-      <footer id="contact" className={classes.footer}>
-        <p>
-          &copy; {new Date().getFullYear()} Skill Horizon. Все права защищены.
-        </p>
-        <div className={classes.footerNav}>
-          <a href="#features">Особенности</a>
-          <a href="#courses">Курсы</a>
-          <a href="#test">Тестирование</a>
-          <a href="#contact">Контакты</a>
-        </div>
-      </footer>
-    </div>
+      <Footer style={{ textAlign: 'center' }}>
+        <Space direction="vertical" size="small">
+          <Text>
+            &copy; {new Date().getFullYear()} Skill Horizon. Все права защищены.
+          </Text>
+          <Space split={<Text type="secondary">|</Text>}>
+            <Button type="link" href="#features">
+              Особенности
+            </Button>
+            <Button type="link" href="#courses">
+              Курсы
+            </Button>
+            <Button type="link" href="#test">
+              Тестирование
+            </Button>
+            <Button type="link" href="#contact">
+              Контакты
+            </Button>
+          </Space>
+        </Space>
+      </Footer>
+    </Layout>
   );
 };

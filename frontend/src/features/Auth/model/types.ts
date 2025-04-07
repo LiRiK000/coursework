@@ -7,6 +7,7 @@ export type AuthFormData = z.infer<ReturnType<typeof authSchema>>;
 
 export type FieldErrorType = FieldErrors<{
   email: string;
+  fullname?: string;
   password: string;
   confirmPassword?: string | undefined;
 }>;
@@ -14,6 +15,7 @@ export type FieldErrorType = FieldErrors<{
 export type ControlType = Control<
   {
     email: string;
+    fullname?: string;
     password: string;
     confirmPassword?: string | undefined;
   },
@@ -21,6 +23,7 @@ export type ControlType = Control<
   unknown,
   {
     email: string;
+    fullname?: string;
     password: string;
     confirmPassword?: string | undefined;
   }

@@ -18,6 +18,26 @@ export const AuthModalFormFields: FC<AuthModalFormFieldsProps> = ({
 }) => {
   return (
     <>
+      {type === AuthModalType.REGISTRATION && (
+        <Form.Item
+          label="Полное имя"
+          validateStatus={errors.fullname ? 'error' : ''}
+          help={errors.fullname?.message}
+        >
+          <Controller
+            name="fullname"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <Input
+                placeholder="Введите ваше полное имя"
+                {...field}
+                allowClear
+              />
+            )}
+          />
+        </Form.Item>
+      )}
       <Form.Item
         label="Email"
         validateStatus={errors.email ? 'error' : ''}

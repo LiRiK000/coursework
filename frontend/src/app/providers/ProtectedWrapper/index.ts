@@ -1,0 +1,1 @@
+export { ProtectedWrapper } from './ProtectedWrapper';

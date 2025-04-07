@@ -69,7 +69,7 @@ export const register = async (
   next: NextFunction,
 ) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, fullname } = req.body;
 
     // Проверяем, существует ли пользователь
     const existingUser = await prisma.user.findUnique({
@@ -80,6 +80,10 @@ export const register = async (
       throw new AppError('Пользователь с таким email уже существует', 400);
     }
 
+    if (!fullname) {
+      throw new AppError('Необходимо указать полное имя', 400);
+    }
+
     // Хешируем пароль
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -87,6 +91,7 @@ export const register = async (
     const user = await prisma.user.create({
       data: {
         email,
+        fullname,
         password: hashedPassword,
       },
     });
@@ -103,23 +108,57 @@ export const login = async (
   res: Response,
   next: NextFunction,
 ) => {
-  console.log('I BEAN CALLED');
   try {
     const { email, password } = req.body;
-
-    console.log(email, password);
 
     // Проверяем, существует ли пользователь
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user) {
+      throw new AppError('Неверный email или пароль', 401);
+    }
+
+    // Проверяем пароль
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordCorrect) {
       throw new AppError('Неверный email или пароль', 401);
     }
 
     // Генерируем токены и отправляем ответ
     await createSendTokens(user, 200, res);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const logout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    // Получаем ID пользователя из req.user (должен быть установлен middleware)
+    const userId = (req as any).user?.id;
+
+    if (userId) {
+      // Очищаем refreshToken в базе данных
+      await prisma.user.update({
+        where: { id: userId },
+        data: { refreshToken: null },
+      });
+    }
+
+    // Очищаем куки
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Выход выполнен успешно',
+    });
   } catch (error) {
     next(error);
   }
@@ -131,10 +170,12 @@ export const refreshTokens = async (
   next: NextFunction,
 ) => {
   try {
-    const { refreshToken } = req.body;
+    const { refreshToken } = req.cookies;
 
     if (!refreshToken) {
-      throw new AppError('Не предоставлен refresh token', 401);
+      console.log(123);
+
+      throw new AppError('Не предоставлен refresh token', 400);
     }
 
     // Проверяем валидность refresh token
@@ -149,14 +190,16 @@ export const refreshTokens = async (
     });
 
     if (!user || user.refreshToken !== refreshToken) {
-      throw new AppError('Недействительный refresh token', 401);
+      console.log(123);
+
+      throw new AppError('Недействительный refresh token', 400);
     }
 
     // Генерируем новые токены
     await createSendTokens(user, 200, res);
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      next(new AppError('Недействительный refresh token', 401));
+      next(new AppError('Недействительный refresh token', 400));
     } else {
       next(error);
     }
