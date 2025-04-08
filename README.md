@@ -1,4 +1,4 @@
-# Проект Coursework
+# Проект SkillHorizon
 
 ## Описание
 

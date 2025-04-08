@@ -7,6 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Achievement {
+  id          String           @id @default(uuid())
+  title       String
+  description String
+  icon        String
+  type        ACHIEVEMENT_TYPE
+  user        User             @relation(fields: [userId], references: [id])
+  userId      String
+  createdAt   DateTime         @default(now())
+
+  @@unique([userId, type])
+}
+
 model User {
   id               String             @id @default(uuid())
   email            String             @unique
@@ -20,6 +33,7 @@ model User {
   Course           Course[]
   Enrollment       Enrollment[]
   ProgressTracking ProgressTracking[]
+  achievements     Achievement[]
 
   @@map("users")
 }
@@ -80,6 +94,13 @@ model ProgressTracking {
   createdAt        DateTime  @default(now())
 
   @@unique([userId, sectionId])
+}
+
+enum ACHIEVEMENT_TYPE {
+  COURSE_COMPLETION
+  PERFECT_SECTION
+  EARLY_ADOPTER
+  STREAK
 }
 
 enum USER_ROLES {

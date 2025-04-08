@@ -10,6 +10,8 @@ export const TabContentSwitcher = ({
   switch (selectedKey) {
     case 'profile':
       return TAB_COMPONENTS.profile;
+    case 'achievements':
+      return TAB_COMPONENTS.achievements;
     case 'settings':
       return TAB_COMPONENTS.settings;
     case 'security':

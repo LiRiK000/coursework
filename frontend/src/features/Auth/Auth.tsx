@@ -125,7 +125,7 @@ export const AuthModal = () => {
           label="Введите пароль"
           validateStatus={errors?.password ? 'error' : undefined}
         >
-          <Input
+          <Input.Password
             placeholder="Введите пароль"
             id="password"
             name="password"
@@ -142,7 +142,7 @@ export const AuthModal = () => {
             label={'Введите пароль повторно'}
             validateStatus={errors?.confirmPassword ? 'error' : undefined}
           >
-            <Input
+            <Input.Password
               placeholder="Введите пароль повторно"
               id="confirmPassword"
               name="confirmPassword"

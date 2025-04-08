@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma';
 import { CustomError } from '../shared/errors/CustomError';
-
-const prisma = new PrismaClient();
 
 export const progressService = {
   async validateAnswer(taskId: string, answer: string) {

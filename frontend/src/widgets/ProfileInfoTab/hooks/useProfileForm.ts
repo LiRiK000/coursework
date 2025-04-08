@@ -1,3 +1,5 @@
+// TODO: Исправить ref: features/Auth
+
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { api } from '@/shared/api/api';
@@ -28,20 +30,21 @@ export const useProfileForm = () => {
     try {
       setLoading(true);
       const response = await api.get('/users/profile');
-      const { fullname, email } = response.data.data.user;
+
+      const { fullname, email, avatar } = response.data.data.user;
 
       reset({ fullname, email });
 
-      // if (avatarUrl) {
-      //   setFileList([
-      //     {
-      //       uid: '-1',
-      //       name: 'avatar',
-      //       status: 'done',
-      //       url: avatarUrl,
-      //     },
-      //   ]);
-      // }
+      if (avatar) {
+        setFileList([
+          {
+            uid: '-1',
+            name: 'avatar',
+            status: 'done',
+            url: avatar,
+          },
+        ]);
+      }
     } catch (error) {
       message.error('Ошибка при загрузке данных профиля');
       console.error(error);

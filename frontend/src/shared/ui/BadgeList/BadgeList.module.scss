@@ -1,0 +1,50 @@
+.gridContainer {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.badgeItem {
+  background: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.contentWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.image {
+  width: 3rem;
+  height: 3rem;
+  object-fit: contain;
+}
+
+.textContainer {
+  flex: 1;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin-bottom: 0.25rem;
+}
+
+.description {
+  color: #4a5568;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}

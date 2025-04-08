@@ -1,22 +1,12 @@
 import { FC, ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/shared/api/api';
 import { Loader } from '@/shared/ui/Loader';
+import { authService } from '@/shared/service/AuthService';
 
 interface ProtectedWrapperProps {
   children: ReactNode;
 }
-
-interface User {
-  id: number;
-  email: string;
-}
-
-const getMe = async (): Promise<User> => {
-  const response = await api.get('/auth/me');
-  return response.data;
-};
 
 export const ProtectedWrapper: FC<ProtectedWrapperProps> = ({ children }) => {
   const location = useLocation();
@@ -27,7 +17,7 @@ export const ProtectedWrapper: FC<ProtectedWrapperProps> = ({ children }) => {
     isError,
   } = useQuery({
     queryKey: ['user'],
-    queryFn: getMe,
+    queryFn: authService.checkAuth,
     retry: false,
   });
 

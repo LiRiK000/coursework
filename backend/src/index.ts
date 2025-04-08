@@ -9,6 +9,7 @@ import dotenv from 'dotenv';
 import { errorHandler } from './middleware/error.middleware';
 import express from 'express';
 import { courseRouter } from './routes/course.routes';
+import { achievementRouter } from './routes/achievement.routes';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use('/api/users', userRouter);
 app.use('/api/sections', sectionRouter);
 app.use('/api/courses', courseRouter);
 app.use('/api/progress', progressRouter);
+app.use('/api/achievements', achievementRouter);
 
 // Error handling
 app.use(errorHandler);

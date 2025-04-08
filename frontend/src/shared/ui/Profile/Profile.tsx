@@ -1,24 +1,15 @@
 import { Avatar } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/shared/api';
 import classes from './Profile.module.scss';
 import { Loader } from '../Loader';
-
-interface User {
-  avatar: string | null;
-}
-
-const getProfile = async (): Promise<User> => {
-  const response = await api.get('/users/profile');
-  return response.data.data.user;
-};
+import { userService } from '@/shared/service/UserService';
 
 export const Profile = () => {
   const navigate = useNavigate();
-  const { data: user, isLoading } = useQuery<User>({
+  const { data: user, isLoading } = useQuery({
     queryKey: ['profile'],
-    queryFn: getProfile,
+    queryFn: userService.getProfile,
   });
   if (isLoading) return <Loader />;
   return (

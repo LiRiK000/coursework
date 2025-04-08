@@ -1,10 +1,10 @@
+import { authService } from '@/shared/service/AuthService';
 import { useMutation } from '@tanstack/react-query';
-import { authApi } from '../api/authApi';
 import { AxiosError } from 'axios';
 
 export const useAuthQuery = () => {
   const loginMutation = useMutation({
-    mutationFn: authApi.login,
+    mutationFn: authService.login,
     onError: (error: AxiosError) => {
       return {
         message: error.message || 'Ошибка при входе в систему',
@@ -13,7 +13,7 @@ export const useAuthQuery = () => {
   });
 
   const registerMutation = useMutation({
-    mutationFn: authApi.register,
+    mutationFn: authService.register,
     onError: (error: AxiosError) => {
       return {
         message: error.message || 'Ошибка при попытке регистрации',

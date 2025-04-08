@@ -1,28 +1,16 @@
 import { FC } from 'react';
 import { Card, Empty, Row, Col, Typography, Input } from 'antd';
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/shared/api';
 import { Loader } from '@/shared/ui/Loader';
 import { MainLayout } from './MainLayout';
+import { courseService } from '@/shared/service/CourseService';
 
 const { Search } = Input;
-
-interface Course {
-  id: string;
-  title: string;
-  description: string;
-  authorId: string;
-}
-
-const fetchCourses = async (): Promise<Course[]> => {
-  const response = await api.get('/courses');
-  return response.data;
-};
 
 export const Main: FC = () => {
   const { data: courses = [], isLoading } = useQuery({
     queryKey: ['courses'],
-    queryFn: fetchCourses,
+    queryFn: courseService.fetchCourses,
   });
 
   if (isLoading) {
