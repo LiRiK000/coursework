@@ -21,19 +21,20 @@ model Achievement {
 }
 
 model User {
-  id               String             @id @default(uuid())
-  email            String             @unique
-  fullname         String
-  password         String
-  role             USER_ROLES         @default(USER)
-  refreshToken     String?
-  avatar           String?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  Course           Course[]
-  Enrollment       Enrollment[]
-  ProgressTracking ProgressTracking[]
-  achievements     Achievement[]
+  id                String             @id @default(uuid())
+  email             String             @unique
+  fullname          String
+  password          String
+  role              USER_ROLES         @default(USER)
+  refreshToken      String?
+  avatar            String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  Course            Course[]
+  Enrollment        Enrollment[]
+  ProgressTracking  ProgressTracking[]
+  achievements      Achievement[]
+  authorshipRequest AuthorshipRequest[]
 
   @@map("users")
 }
@@ -107,4 +108,20 @@ enum USER_ROLES {
   USER
   ADMIN
   AUTHOR
+}
+
+enum REQUEST_STATUS {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model AuthorshipRequest {
+  id          String         @id @default(uuid())
+  user        User           @relation(fields: [userId], references: [id])
+  userId      String
+  status      REQUEST_STATUS @default(PENDING)
+  message     String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 }

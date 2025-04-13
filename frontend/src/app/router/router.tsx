@@ -1,16 +1,25 @@
 import { Landing } from '@/pages/Landing';
 import { NotFound } from '@/pages/NotFound';
-import { Route, BrowserRouter, Routes } from 'react-router-dom';
-import { ProtectedWrapper } from '../providers/ProtectedWrapper';
+import { NotAllowed } from '@/pages/NotAllowed';
 import { Main } from '@/pages/Main';
 import { Profile } from '@/pages/Profile';
+import { Admin } from '@/pages/Admin';
+import { Route, BrowserRouter, Routes } from 'react-router-dom';
+import { ProtectedWrapper } from '../providers/ProtectedWrapper';
 import { Suspense } from 'react';
 import { Loader } from '@/shared/ui/Loader';
 
 export const CoreRouter = () => (
   <BrowserRouter>
     <Routes>
-      <Route path="/" element={<Landing />} />
+      <Route
+        path="/"
+        element={
+          <Suspense fallback={<Loader fullscreen />}>
+            <Landing />
+          </Suspense>
+        }
+      />
       <Route
         path="/main"
         element={
@@ -31,6 +40,17 @@ export const CoreRouter = () => (
           </ProtectedWrapper>
         }
       />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedWrapper requiredRole="ADMIN">
+            <Suspense fallback={<Loader fullscreen />}>
+              <Admin />
+            </Suspense>
+          </ProtectedWrapper>
+        }
+      />
+      <Route path="/not-allowed" element={<NotAllowed />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </BrowserRouter>

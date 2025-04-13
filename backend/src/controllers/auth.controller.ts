@@ -6,7 +6,6 @@ import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma';
 
 const signAccessToken = (id: string): string => {
-  console.log(process.env.JWT_SECRET);
   return jwt.sign({ id }, process.env.JWT_SECRET as string, {
     expiresIn: '15m', // 15 минут
   });
@@ -173,8 +172,6 @@ export const refreshTokens = async (
     const { refreshToken } = req.cookies;
 
     if (!refreshToken) {
-      console.log(123);
-
       throw new AppError('Не предоставлен refresh token', 400);
     }
 
@@ -190,8 +187,6 @@ export const refreshTokens = async (
     });
 
     if (!user || user.refreshToken !== refreshToken) {
-      console.log(123);
-
       throw new AppError('Недействительный refresh token', 400);
     }
 
@@ -227,6 +222,8 @@ export const getMe = async (
           id: user.id,
           email: user.email,
           role: user.role,
+          fullname: user.fullname,
+          avatar: user.avatar,
         },
       },
     });

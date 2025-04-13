@@ -10,6 +10,7 @@ import { errorHandler } from './middleware/error.middleware';
 import express from 'express';
 import { courseRouter } from './routes/course.routes';
 import { achievementRouter } from './routes/achievement.routes';
+import { authorshipRequestRouter } from './routes/authorshipRequest.routes';
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use('/api/sections', sectionRouter);
 app.use('/api/courses', courseRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/achievements', achievementRouter);
+app.use('/api/authorship/request', authorshipRequestRouter);
 
 // Error handling
 app.use(errorHandler);

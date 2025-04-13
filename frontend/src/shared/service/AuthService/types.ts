@@ -1,4 +1,4 @@
-export interface AuthData {
+export interface AuthDTO {
   email: string;
   password: string;
   confirmPassword?: string;
@@ -6,6 +6,24 @@ export interface AuthData {
 }
 
 export interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
+  status: string;
+  data: {
+    user: {
+      id: string;
+      email: string;
+      role: string;
+    };
+  };
+}
+
+export interface GetMeResponse {
+  status: string;
+  data: {
+    user: {
+      id: string;
+      email: string;
+      fullname: string;
+      role: string;
+    };
+  };
 }

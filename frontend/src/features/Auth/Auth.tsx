@@ -23,6 +23,12 @@ export const AuthModal = () => {
 
   const handleSubmitForm = () => {
     setIsSubmitted(true);
+    const validationErrors = validate(ModalType);
+
+    if (validationErrors) {
+      return;
+    }
+
     switch (ModalType) {
       case AuthModalType.LOGIN:
         login(formData);
@@ -50,18 +56,21 @@ export const AuthModal = () => {
     );
   };
 
-  if (mutationError) {
-    notification.error({
-      message: 'Ошибка',
-      description: mutationError.message || 'Произошла ошибка при авторизации',
-    });
-  }
-
-  if (mutationSuccess) {
-    notification.success({
-      message: 'Успешно',
-      description: 'Вы успешно авторизовались',
-    });
+  if (isSubmitted) {
+    if (mutationError) {
+      notification.error({
+        message: 'Ошибка',
+        description:
+          mutationError.message || 'Произошла ошибка при авторизации',
+      });
+    }
+    if (mutationSuccess) {
+      notification.success({
+        message: 'Успешно',
+        description: 'Вы успешно авторизовались',
+      });
+      setIsSubmitted(false);
+    }
   }
 
   const errors = isSubmitted ? validate(ModalType) : undefined;
@@ -90,6 +99,7 @@ export const AuthModal = () => {
           <Form.Item
             label={'Введите полное имя'}
             validateStatus={errors?.fullname ? 'error' : undefined}
+            help={errors?.fullname && errors?.fullname._errors[0]}
           >
             <Input
               placeholder="Введите полное имя"
@@ -104,10 +114,10 @@ export const AuthModal = () => {
             />
           </Form.Item>
         )}
-
         <Form.Item
           label={'Введите email'}
           validateStatus={errors?.email ? 'error' : undefined}
+          help={errors?.email && errors?.email._errors[0]}
         >
           <Input
             placeholder="Введите email"
@@ -124,6 +134,7 @@ export const AuthModal = () => {
         <Form.Item
           label="Введите пароль"
           validateStatus={errors?.password ? 'error' : undefined}
+          help={errors?.password && errors?.password._errors[0]}
         >
           <Input.Password
             placeholder="Введите пароль"
@@ -141,6 +152,7 @@ export const AuthModal = () => {
           <Form.Item
             label={'Введите пароль повторно'}
             validateStatus={errors?.confirmPassword ? 'error' : undefined}
+            help={errors?.confirmPassword && errors?.confirmPassword._errors[0]}
           >
             <Input.Password
               placeholder="Введите пароль повторно"

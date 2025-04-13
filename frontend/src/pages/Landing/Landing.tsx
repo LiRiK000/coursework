@@ -2,7 +2,7 @@ import { AuthModalType, useAuthModal } from '@/features/Auth';
 import { Menu } from '@/widgets/Menu';
 import { api } from '@/shared/api';
 import { Button, Typography, Layout, Space, Card, Row, Col } from 'antd';
-import styles from './Landing.module.scss';
+import classes from './Landing.module.scss';
 
 const { Title, Paragraph, Text } = Typography;
 const { Content, Footer } = Layout;
@@ -22,7 +22,7 @@ export const Landing = () => {
           justify="space-between"
           align="middle"
           style={{ width: '100%' }}
-          className={styles.hero}
+          className={classes.hero}
           gutter={[32, 32]}
         >
           <Col xs={24} md={12}>
@@ -39,7 +39,7 @@ export const Landing = () => {
             </Space>
           </Col>
           <Col xs={24} md={12}>
-            <div className={styles.heroImage} />
+            <div className={classes.heroImage} />
           </Col>
         </Row>
 

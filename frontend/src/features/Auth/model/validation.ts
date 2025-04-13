@@ -10,7 +10,7 @@ export const authSchema = (type: AuthModalType) =>
         .min(5, 'Email должен быть не менее 5 символов'),
       fullname:
         type === AuthModalType.REGISTRATION
-          ? z.string().min(2, 'Имя должно быть не менее 2 символов')
+          ? z.string().min(8, 'Имя должно быть не менее 8 символов')
           : z.literal('').optional(),
       password: z.string().min(6, 'Пароль должен быть не менее 6 символов'),
       confirmPassword:

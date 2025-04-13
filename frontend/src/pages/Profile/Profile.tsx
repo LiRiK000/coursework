@@ -2,17 +2,37 @@ import { Button, Layout, Menu, message } from 'antd';
 import { useState } from 'react';
 import classes from './Profile.module.scss';
 import { tabs } from './constants';
-import { TabContentSwitcher } from './TabContentSwitcher';
+import { TabContentSwitcher } from './TabContentSwitcher.tsx';
 import { useNavigate } from 'react-router-dom';
 import { useLogoutMutation } from '@/pages/Profile/hooks/useLogoutMutation';
+import { authorshipService } from '@/shared/service/AuthorshipService';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useUser } from '@/entities/User';
+import { USER_ROLES } from '@/shared/service/UserService';
 
 const { Content, Sider } = Layout;
 
 export const Profile = () => {
   const [selectedKey, setSelectedKey] = useState('profile');
   const navigate = useNavigate();
+  const { role } = useUser();
 
   const logoutMutation = useLogoutMutation();
+
+  const { data: userRequest } = useQuery({
+    queryKey: ['user-request'],
+    queryFn: authorshipService.getUserRequest,
+  });
+
+  const { mutate: createRequest } = useMutation({
+    mutationFn: authorshipService.createRequest,
+    onSuccess: () => {
+      message.success('Ваша заявка будет рассмотрена');
+    },
+    onError: () => {
+      message.error('Произошла ошибка при отправке заявки');
+    },
+  });
 
   const handleLogout = async () => {
     try {
@@ -35,11 +55,18 @@ export const Profile = () => {
           className={classes.menu}
         />
         <div className={classes.siderFooter}>
-          <Button type="primary" block onClick={handleLogout}>
+          {role !== USER_ROLES.AUTHOR && (
+            <Button
+              type="primary"
+              onClick={() => createRequest()}
+              block
+              disabled={!!userRequest}
+            >
+              {userRequest ? 'Заявка на рассмотрении' : 'Хочу стать автором'}
+            </Button>
+          )}
+          <Button variant="solid" color="danger" block onClick={handleLogout}>
             Выйти
-          </Button>
-          <Button type="default" block>
-            Хочу стать автором
           </Button>
         </div>
       </Sider>

@@ -11,15 +11,15 @@ export class UserService {
   }
 
   async updateUser(updateData: UserUpdateDto): Promise<UserProfile> {
-    const response = await api.patch<ApiResponse<UserProfile>>(
-      '/api/users',
+    const response = await api.patch<ApiResponse<{ user: UserProfile }>>(
+      '/users/profile',
       updateData,
     );
-    return response.data.data;
+    return response.data.data.user;
   }
 
   async changePassword(passwordData: PasswordChangeDto): Promise<void> {
-    await api.patch('/api/users/password', passwordData);
+    await api.patch('/users/password', passwordData);
   }
 
   async uploadAvatar(image: File): Promise<string> {

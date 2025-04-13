@@ -27,7 +27,7 @@ export const MainLayout: FC<MainLayoutProps> = ({ children }) => {
       </Sider>
       <Content className={classes.content}>
         {/* <TabContentSwitcher selectedKey={selectedKey} /> */}
-        <NavBar />
+        <NavBar showMenuItems={false} />
         {children}
       </Content>
     </Layout>

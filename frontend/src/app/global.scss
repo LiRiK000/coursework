@@ -11,6 +11,9 @@ body,
   margin: 0;
   overflow-x: hidden;
   padding: 0;
+  height: 100%;
+  width: 100%;
+  background-color: #131414;
 }
 
 [class^='ant-'] {
@@ -38,7 +41,7 @@ select:-webkit-autofill:focus {
 }
 
 *::-webkit-scrollbar-track {
-  background: none;
+  background: #121416;
 }
 
 *::-webkit-scrollbar-thumb {
@@ -47,5 +50,5 @@ select:-webkit-autofill:focus {
 }
 
 *::-webkit-scrollbar-corner {
-  background: transparent;
+  background: none;
 }

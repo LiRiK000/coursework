@@ -1,30 +1,50 @@
 import { Profile } from '@/shared/ui/Profile';
 import { links } from './constants';
 import classes from './Menu.module.scss';
-import { Typography } from 'antd';
+import { Button, Typography } from 'antd';
+import { useAuth } from '@/features/Auth/hooks/useAuth';
+import { FC } from 'react';
+import { AuthModalType, useAuthModal } from '@/features/Auth';
 
-export const Menu = () => {
-  // TODO useAuth
+interface MenuProps {
+  showMenuItems?: boolean;
+}
+
+export const Menu: FC<MenuProps> = ({ showMenuItems = true }) => {
+  const { isAuthenticated } = useAuth();
+  const { openAuthModal } = useAuthModal();
+
+  const handleClick = () => {
+    openAuthModal(AuthModalType.LOGIN);
+  };
+
   return (
     <header className={classes.header}>
       <div>
-        <Typography.Text className={classes.logo}>
+        <Typography.Link className={classes.logo} href="/">
           Skill Horizon
-        </Typography.Text>
+        </Typography.Link>
       </div>
-      <nav>
-        {links.map((link) => (
-          <Typography.Link
-            href={link.href}
-            className={classes.linkItem}
-            key={link.href}
-          >
-            {link.label}
-          </Typography.Link>
-        ))}
-      </nav>
-      {/* <button className={classes.signIn}>Войти</button> */}
-      <Profile />
+      {showMenuItems && (
+        <nav>
+          {links.map((link) => (
+            <Typography.Link
+              href={link.href}
+              className={classes.linkItem}
+              key={link.href}
+            >
+              {link.label}
+            </Typography.Link>
+          ))}
+        </nav>
+      )}
+      {!isAuthenticated ? (
+        <Button type="primary" onClick={handleClick}>
+          Войти
+        </Button>
+      ) : (
+        <Profile />
+      )}
     </header>
   );
 };

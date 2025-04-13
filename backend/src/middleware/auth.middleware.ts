@@ -12,7 +12,7 @@ interface JwtPayload {
 declare global {
   namespace Express {
     interface Request {
-      user: User; // Убираем опциональность, т.к. после middleware user всегда определён
+      user: User;
     }
   }
 }

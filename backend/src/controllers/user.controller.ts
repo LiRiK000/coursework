@@ -164,7 +164,7 @@ export const updateProfile = async (
     if (fullname) updateData.fullname = fullname;
     if (email) updateData.email = email;
     if (req.file) {
-      console.log(SERVER_URL);
+      //FIXME: При обновлении SERVER URL все сломается
       const avatarUrl = `${SERVER_URL}/uploads/avatars/${req.file.filename}`;
       updateData.avatar = avatarUrl;
     }
