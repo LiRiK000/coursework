@@ -1,6 +1,3 @@
-// TODO: Улучшить логику перехвата ошибок
-
-import { notification } from 'antd';
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import { authService } from '../service/AuthService';
 
@@ -16,6 +13,25 @@ export const api = axios.create({
   withCredentials: true,
 });
 
+// Флаг для отслеживания процесса обновления токена
+let isRefreshing = false;
+// Очередь запросов, ожидающих обновления токена
+let failedQueue: Array<{
+  resolve: (value: unknown) => void;
+  reject: (reason?: unknown) => void;
+}> = [];
+
+const processQueue = (error: unknown = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(null);
+    }
+  });
+  failedQueue = [];
+};
+
 api.interceptors.request.use(
   (config) => {
     config.withCredentials = true;
@@ -28,31 +44,36 @@ api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config! as CustomAxiosRequestConfig;
-    const MAX_RETRY_ATTEMPTS = 2;
+    const MAX_RETRY_ATTEMPTS = 1;
 
-    if (
-      error.response?.status === 401 &&
-      (!originalRequest.retryCount || originalRequest.retryCount === undefined)
-    ) {
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // Если уже идет обновление токена, добавляем запрос в очередь
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(() => {
+            return api(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
       originalRequest._retry = true;
       originalRequest.retryCount = (originalRequest.retryCount || 0) + 1;
 
       if (originalRequest.retryCount <= MAX_RETRY_ATTEMPTS) {
-        originalRequest.retryCount++;
+        isRefreshing = true;
+
         try {
           await authService.checkAuth();
-          console.log(originalRequest);
+          isRefreshing = false;
+          processQueue();
           return api(originalRequest);
         } catch (refreshError) {
-          notification.error({
-            message: 'Ошибка',
-            description: 'Произошла ошибка при выполнении запроса',
-          });
-          await authService.logout();
-          localStorage.clear();
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 1500);
+          isRefreshing = false;
+          processQueue(refreshError);
           return Promise.reject(refreshError);
         }
       }

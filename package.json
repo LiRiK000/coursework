@@ -1,0 +1,8 @@
+{
+  "name": "skill-horizon",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "pnpm --recursive run dev"
+  }
+}
