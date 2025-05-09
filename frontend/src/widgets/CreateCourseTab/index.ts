@@ -1,0 +1,1 @@
+export { CreateCourseTab } from './CreateCourseTab';

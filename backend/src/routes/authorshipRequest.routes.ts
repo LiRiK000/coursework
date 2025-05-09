@@ -9,7 +9,7 @@ router.post('/', authorshipRequestController.create);
 
 router.get(
   '/',
-  restrictTo(USER_ROLES.ADMIN),
+  restrictTo([USER_ROLES.ADMIN]),
   authorshipRequestController.getAll,
 );
 
@@ -17,7 +17,7 @@ router.get('/me', authorshipRequestController.userRequest);
 
 router.patch(
   '/:id',
-  restrictTo(USER_ROLES.ADMIN),
+  restrictTo([USER_ROLES.ADMIN]),
   authorshipRequestController.updateStatus,
 );
 

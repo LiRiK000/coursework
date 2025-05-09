@@ -172,14 +172,22 @@ export const refreshTokens = async (
     const { refreshToken } = req.cookies;
 
     if (!refreshToken) {
-      throw new AppError('Не предоставлен refresh token', 400);
+      throw new AppError('Не предоставлен refresh token', 401);
     }
 
     // Проверяем валидность refresh token
-    const decoded = jwt.verify(
-      refreshToken,
-      process.env.JWT_REFRESH_SECRET as string,
-    ) as { id: string };
+    let decoded;
+    try {
+      decoded = jwt.verify(
+        refreshToken,
+        process.env.JWT_REFRESH_SECRET as string,
+      ) as { id: string };
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        throw new AppError('Refresh token истек', 401);
+      }
+      throw new AppError('Недействительный refresh token', 401);
+    }
 
     // Находим пользователя и проверяем refresh token
     const user = await prisma.user.findUnique({
@@ -187,16 +195,16 @@ export const refreshTokens = async (
     });
 
     if (!user || user.refreshToken !== refreshToken) {
-      throw new AppError('Недействительный refresh token', 400);
+      throw new AppError('Недействительный refresh token', 401);
     }
 
     // Генерируем новые токены
     await createSendTokens(user, 200, res);
   } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError) {
-      next(new AppError('Недействительный refresh token', 400));
-    } else {
+    if (error instanceof AppError) {
       next(error);
+    } else {
+      next(new AppError('Ошибка при обновлении токенов', 500));
     }
   }
 };

@@ -1,13 +1,44 @@
-// TODO: улучшить дизайн этого таба, вернуть логику сохранения обновленных данных
-import { Typography, Space, Row, Col, Avatar } from 'antd';
+import { Typography, Space, Row, Col, Avatar, Upload, Button } from 'antd';
+import { UploadOutlined, UserOutlined } from '@ant-design/icons';
 import { useUser } from '@/entities/User';
 import { ProfileBlock } from '@/shared/ui/ProfileBlock';
+import { roleMapper } from '@/shared/utils';
+import { useUpdateProfile } from './hooks/useUpdateProfile';
+import { useUpdateAvatar } from './hooks/useUpdateAvatar';
+import type { UploadProps } from 'antd';
+import { useEffect } from 'react';
 
 export const ProfileInfoTab = () => {
   const { email, fullname, role, avatar } = useUser();
+  const { handleUpdateUser, isUpdating } = useUpdateProfile();
+  const { handleAvatarUpload, isUploading, fileList, setFileList } =
+    useUpdateAvatar();
+
+  useEffect(() => {
+    if (avatar) {
+      setFileList([
+        {
+          uid: '-1',
+          name: 'avatar',
+          status: 'done',
+          url: avatar,
+        },
+      ]);
+    }
+  }, [avatar, setFileList]);
+
+  const uploadProps: UploadProps = {
+    showUploadList: false,
+    beforeUpload: (file) => {
+      handleAvatarUpload(file);
+      return false;
+    },
+    fileList,
+  };
+
   return (
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
-      <Typography.Title level={4}>Информация профиля</Typography.Title>
+      <Typography.Title level={2}>Информация профиля</Typography.Title>
 
       <div
         style={{
@@ -32,11 +63,34 @@ export const ProfileInfoTab = () => {
             {email}
           </Typography.Text>
           <Typography.Text type="secondary" style={{ marginTop: '4px' }}>
-            Роль: {role}
+            Роль: {roleMapper(role)}
           </Typography.Text>
         </div>
-        {/* TODO: Пустой аватар с возможностью загрузки */}
-        {avatar ? <Avatar src={avatar} size={100} /> : <></>}
+        <Upload {...uploadProps}>
+          <div style={{ position: 'relative' }}>
+            <Avatar
+              src={avatar}
+              size={100}
+              icon={<UserOutlined />}
+              style={{ cursor: 'pointer' }}
+            />
+            <Button
+              type="primary"
+              icon={<UploadOutlined />}
+              size="small"
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                padding: 0,
+              }}
+              loading={isUploading}
+            />
+          </div>
+        </Upload>
       </div>
 
       <Row gutter={[24, 24]}>
@@ -44,14 +98,16 @@ export const ProfileInfoTab = () => {
           <ProfileBlock
             title="ФИО"
             value={fullname}
-            onSave={(v) => console.log('Name updated:', v)}
+            onSave={(v) => handleUpdateUser('fullname', v)}
+            disabled={isUpdating}
           />
         </Col>
         <Col xs={24} md={12}>
           <ProfileBlock
             title="email"
             value={email}
-            onSave={(v) => console.log('Email updated:', v)}
+            onSave={(v) => handleUpdateUser('email', v)}
+            disabled={isUpdating}
           />
         </Col>
       </Row>

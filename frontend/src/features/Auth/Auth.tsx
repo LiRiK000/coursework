@@ -10,7 +10,7 @@ const { Text } = Typography;
 
 export const AuthModal = () => {
   const { isOpen, closeAuthModal, ModalType, openAuthModal } = useAuthModal();
-  const { mutationError, mutationSuccess, isLoading, login, register } =
+  const { mutationSuccess, isLoading, login, register, isError } =
     useAuthQuery();
 
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -40,6 +40,7 @@ export const AuthModal = () => {
         break;
     }
   };
+
   const validate = (type: AuthModalType) => {
     const res = authSchema(type).safeParse(formData);
     if (res.success) {
@@ -56,21 +57,22 @@ export const AuthModal = () => {
     );
   };
 
-  if (isSubmitted) {
-    if (mutationError) {
-      notification.error({
-        message: 'Ошибка',
-        description:
-          mutationError.message || 'Произошла ошибка при авторизации',
-      });
-    }
-    if (mutationSuccess) {
-      notification.success({
-        message: 'Успешно',
-        description: 'Вы успешно авторизовались',
-      });
-      setIsSubmitted(false);
-    }
+  if (isError) {
+    notification.error({
+      message: 'Ошибка',
+      description: 'Не удалось авторизоваться',
+    });
+  }
+
+  if (isSubmitted && mutationSuccess) {
+    notification.success({
+      message: 'Успешно',
+      description:
+        ModalType === AuthModalType.LOGIN
+          ? 'Вы успешно авторизовались'
+          : 'Вы успешно зарегистрировались',
+    });
+    setIsSubmitted(false);
   }
 
   const errors = isSubmitted ? validate(ModalType) : undefined;
@@ -86,10 +88,16 @@ export const AuthModal = () => {
           type="primary"
           onClick={handleSubmitForm}
           loading={isLoading}
+          disabled={isLoading}
         >
           {ModalType === AuthModalType.LOGIN ? 'Войти' : 'Зарегистрироваться'}
         </Button>,
-        <Button key="cancel" type="default" onClick={closeAuthModal}>
+        <Button
+          key="cancel"
+          type="default"
+          onClick={closeAuthModal}
+          disabled={isLoading}
+        >
           Отмена
         </Button>,
       ]}
@@ -167,6 +175,7 @@ export const AuthModal = () => {
               }
               required
               allowClear
+              disabled={isLoading}
             />
           </Form.Item>
         )}
@@ -176,7 +185,7 @@ export const AuthModal = () => {
           {ModalType === AuthModalType.LOGIN
             ? 'Еще нет аккаунта? '
             : 'Уже есть аккаунт? '}
-          <Button type="link" onClick={toggleAuthMode}>
+          <Button type="link" onClick={toggleAuthMode} disabled={isLoading}>
             {ModalType === AuthModalType.LOGIN ? 'Зарегистрироваться' : 'Войти'}
           </Button>
         </Text>

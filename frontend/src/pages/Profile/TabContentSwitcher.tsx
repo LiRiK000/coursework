@@ -1,3 +1,4 @@
+import { NotFoundTab } from '@/widgets/NotFoundTab';
 import { TAB_COMPONENTS } from './constants';
 
 interface TabContentSwitcherProps {
@@ -17,6 +18,6 @@ export const TabContentSwitcher = ({
     case 'security':
       return TAB_COMPONENTS.security;
     default:
-      return TAB_COMPONENTS.profile; // TODO: 404 or undefined tab
+      return <NotFoundTab />;
   }
 };

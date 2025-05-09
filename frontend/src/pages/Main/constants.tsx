@@ -1,25 +1,51 @@
-import { UserOutlined, SettingOutlined, HeartFilled } from '@ant-design/icons';
+import { AllCoursesTab } from '@/widgets/AllCoursesTab';
+import { CreateCourseTab } from '@/widgets/CreateCourseTab';
+import {
+  BookOutlined,
+  HeartFilled,
+  ReadOutlined,
+  PlusCircleOutlined,
+} from '@ant-design/icons';
+import { useUser } from '@/entities/User';
+import { FavoriteTab } from '@/widgets/FavoriteTab';
 
-export const tabs = [
-  {
-    key: 'profile',
-    icon: <UserOutlined />,
-    label: 'Все курсы',
-  },
-  {
-    key: 'settings',
-    icon: <SettingOutlined />,
-    label: 'Настройки',
-  },
-  {
-    key: 'security',
-    icon: <HeartFilled />,
-    label: 'Избранное',
-  },
-];
+export const useTabs = () => {
+  const { role } = useUser();
+  const hasRights = role === 'AUTHOR' || role === 'ADMIN';
+
+  const tabs = [
+    {
+      key: 'all-courses',
+      icon: <BookOutlined />,
+      label: 'Все курсы',
+    },
+    {
+      key: 'favorites',
+      icon: <HeartFilled />,
+      label: 'Избранное',
+    },
+    ...(hasRights
+      ? [
+          {
+            key: 'my-courses',
+            icon: <ReadOutlined />,
+            label: 'Мои курсы',
+          },
+          {
+            key: 'create-course',
+            icon: <PlusCircleOutlined />,
+            label: 'Создать курс',
+          },
+        ]
+      : []),
+  ];
+
+  return tabs;
+};
 
 export const TAB_COMPONENTS = {
-  profile: <></>,
-  settings: <></>,
-  security: <></>,
+  'all-courses': <AllCoursesTab />,
+  favorites: <FavoriteTab />,
+  'my-courses': <></>,
+  'create-course': <CreateCourseTab />,
 } as const;

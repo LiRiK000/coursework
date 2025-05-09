@@ -4,9 +4,8 @@ import { ApiResponse } from '../types';
 
 export class UserService {
   async getProfile(): Promise<UserProfile> {
-    const response = await api.get<ApiResponse<{ user: UserProfile }>>(
-      '/users/profile',
-    );
+    const response =
+      await api.get<ApiResponse<{ user: UserProfile }>>('/users/profile');
     return response.data.data.user;
   }
 
@@ -26,8 +25,8 @@ export class UserService {
     const formData = new FormData();
     formData.append('avatar', image);
 
-    const response = await api.post<ApiResponse<{ avatar: string }>>(
-      '/api/users/avatar',
+    const response = await api.patch<ApiResponse<{ avatar: string }>>(
+      '/users/profile',
       formData,
       {
         headers: {

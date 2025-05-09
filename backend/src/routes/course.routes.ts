@@ -6,9 +6,17 @@ const router = Router();
 router.use(protect);
 
 router.get('/', courseController.getAll);
-router.post('/', restrictTo('AUTHOR'), courseController.create);
+router.post('/', restrictTo(['ADMIN'], ['AUTHOR']), courseController.create);
 router.get('/:id', courseController.getById);
-router.patch('/:id', restrictTo('AUTHOR'), courseController.update);
-router.delete('/:id', restrictTo('AUTHOR'), courseController.delete);
+router.patch(
+  '/:id',
+  restrictTo(['ADMIN'], ['AUTHOR']),
+  courseController.update,
+);
+router.delete(
+  '/:id',
+  restrictTo(['ADMIN'], ['AUTHOR']),
+  courseController.delete,
+);
 
 export const courseRouter = router;

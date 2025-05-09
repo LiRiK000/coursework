@@ -1,15 +1,52 @@
 import { api } from '@/shared/api';
-import { Course } from './types';
-import { ApiResponse } from '../types';
+import { Course, ICreateCourse, ToggleFavoriteResponse } from './types';
 
 export class CourseService {
-  async fetchCourses(): Promise<Course[]> {
-    const response = await api.get<ApiResponse<Course[]>>('/courses');
-    return response.data.data;
+  async getCourses(): Promise<Course[]> {
+    const response = await api.get<Course[]>('/courses');
+    return response.data;
   }
 
   async getCourseById(id: string): Promise<Course> {
-    const response = await api.get<ApiResponse<Course>>(`/courses/${id}`);
+    const response = await api.get<{ status: string; data: Course }>(
+      `/courses/${id}`,
+    );
+    return response.data.data;
+  }
+
+  async createCourse(courseData: ICreateCourse): Promise<Course> {
+    const response = await api.post('/courses', courseData);
+    return response.data;
+  }
+
+  async updateCourse(id: string, courseData: FormData): Promise<Course> {
+    const response = await api.patch<{ status: string; data: Course }>(
+      `/courses/${id}`,
+      courseData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+    return response.data.data;
+  }
+
+  async deleteCourse(id: string): Promise<void> {
+    await api.delete(`/courses/${id}`);
+  }
+
+  async toggleFavorite(courseId: string): Promise<boolean> {
+    const response = await api.post<ToggleFavoriteResponse>(
+      `/favorites/${courseId}`,
+    );
+    return response.data.data.isFavorite;
+  }
+
+  async getFavoriteCourses(): Promise<Course[]> {
+    const response = await api.get<{ status: string; data: Course[] }>(
+      '/favorites',
+    );
     return response.data.data;
   }
 }

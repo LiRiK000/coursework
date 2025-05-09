@@ -7,14 +7,6 @@
   border-right: 0;
 }
 
-.siderFooter {
-  width: 100%;
-  position: absolute;
-  bottom: 0;
-  & > button {
-    margin-bottom: 8px;
-  }
-}
 .content {
   padding: 24px;
   min-height: 280px;

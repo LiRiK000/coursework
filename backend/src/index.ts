@@ -11,6 +11,7 @@ import express from 'express';
 import { courseRouter } from './routes/course.routes';
 import { achievementRouter } from './routes/achievement.routes';
 import { authorshipRequestRouter } from './routes/authorshipRequest.routes';
+import { favoriteRouter } from './routes/favorite.routes';
 
 dotenv.config();
 
@@ -25,8 +26,8 @@ const corsOptions = {
 
 // Middleware
 app.use(cors(corsOptions));
-app.use(cookieParser());
 app.use(express.json());
+app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));
 
 // Routes
@@ -38,6 +39,7 @@ app.use('/api/courses', courseRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/achievements', achievementRouter);
 app.use('/api/authorship/request', authorshipRequestRouter);
+app.use('/api/favorites', favoriteRouter);
 
 // Error handling
 app.use(errorHandler);

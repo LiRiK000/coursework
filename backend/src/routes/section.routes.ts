@@ -7,13 +7,21 @@ router.use(protect);
 
 router.post(
   '/courses/:courseId/sections',
-  restrictTo('AUTHOR'),
+  restrictTo(['AUTHOR', 'ADMIN']),
   sectionController.create,
 );
 
 router.get('/courses/:courseId/sections', sectionController.getAll);
 router.get('/sections/:id', sectionController.getById);
-router.patch('/sections/:id', restrictTo('AUTHOR'), sectionController.update);
-router.delete('/sections/:id', restrictTo('AUTHOR'), sectionController.delete);
+router.patch(
+  '/sections/:id',
+  restrictTo(['AUTHOR', 'ADMIN']),
+  sectionController.update,
+);
+router.delete(
+  '/sections/:id',
+  restrictTo(['AUTHOR', 'ADMIN']),
+  sectionController.delete,
+);
 
 export const sectionRouter = router;

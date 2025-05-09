@@ -1,13 +1,22 @@
-.blockContainer:hover {
-  cursor: pointer;
-}
-
 .blockContainer {
-  // background: $background-secondary;
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
   border: 1px solid rgba(#ffff, 0.1);
+  transition: all 0.2s ease;
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  &.disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+
+    &:hover {
+      cursor: not-allowed;
+    }
+  }
 }
 
 .header {
@@ -23,15 +32,12 @@
   margin-top: 8px;
 
   .editInput {
-    // background: $background-primary;
     border: 1px solid rgba(#ffff, 0.1);
     border-radius: 4px;
     padding: 8px 12px;
-    // color: $text-primary;
     flex-grow: 1;
 
     &:focus {
-      // border-color: $primary-color;
       outline: none;
     }
   }

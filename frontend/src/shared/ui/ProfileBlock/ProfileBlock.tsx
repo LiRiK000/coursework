@@ -8,9 +8,15 @@ type ProfileBlockProps = {
   title: string;
   value: string;
   onSave: (newValue: string) => void;
+  disabled?: boolean;
 };
 
-export const ProfileBlock = ({ title, value, onSave }: ProfileBlockProps) => {
+export const ProfileBlock = ({
+  title,
+  value,
+  onSave,
+  disabled = false,
+}: ProfileBlockProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedValue, setEditedValue] = useState(value);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -23,13 +29,15 @@ export const ProfileBlock = ({ title, value, onSave }: ProfileBlockProps) => {
   useClickOutside(containerRef, handleSave, isEditing);
 
   const handleEditClick = () => {
-    setIsEditing(true);
+    if (!disabled) {
+      setIsEditing(true);
+    }
   };
 
   return (
     <div
       ref={containerRef}
-      className={classes.blockContainer}
+      className={`${classes.blockContainer} ${disabled ? classes.disabled : ''}`}
       role="button"
       onClick={handleEditClick}
     >
@@ -40,6 +48,7 @@ export const ProfileBlock = ({ title, value, onSave }: ProfileBlockProps) => {
             className={classes.editInput}
             value={editedValue}
             onChange={(e) => setEditedValue(e.target.value)}
+            disabled={disabled}
           />
         </div>
       ) : (
@@ -48,9 +57,11 @@ export const ProfileBlock = ({ title, value, onSave }: ProfileBlockProps) => {
             <Typography.Text className={classes.valueText}>
               {value}
             </Typography.Text>
-            <EditOutlined
-              style={{ color: 'rgba(255, 255, 255, 0.45)', fontSize: '16px' }}
-            />
+            {!disabled && (
+              <EditOutlined
+                style={{ color: 'rgba(255, 255, 255, 0.45)', fontSize: '16px' }}
+              />
+            )}
           </div>
         </div>
       )}
