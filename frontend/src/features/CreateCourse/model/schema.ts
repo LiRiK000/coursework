@@ -1,46 +1,70 @@
-// TODO: Подумать над схемой
-
 import { z } from 'zod';
 
-const questionSchema = z.object({
+export const TestOptionSchema = z.object({
   id: z.string(),
-  text: z.string().min(1, 'Вопрос не может быть пустым'),
-  type: z.enum(['SINGLE', 'MULTIPLE', 'TEXT']),
-  options: z.array(z.string()).optional(),
-  correctAnswers: z.array(z.string()),
+  text: z.string().min(1, 'Вариант ответа не может быть пустым'),
+  isCorrect: z.boolean(),
 });
 
-const testSchema = z.object({
+export const TestQuestionSchema = z.object({
+  id: z.string(),
+  question: z.string().min(1, 'Вопрос не может быть пустым'),
+  options: z
+    .array(TestOptionSchema)
+    .min(2, 'Должно быть минимум 2 варианта ответа')
+    .refine(
+      (options) => options.some((opt) => opt.isCorrect),
+      'Должен быть хотя бы один правильный ответ',
+    ),
+});
+
+export const TestSchema = z.object({
   id: z.string(),
   title: z.string().min(1, 'Название теста не может быть пустым'),
+  description: z.string().min(1, 'Описание теста не может быть пустым'),
   questions: z
-    .array(questionSchema)
-    .min(1, 'Тест должен содержать хотя бы один вопрос'),
+    .array(TestQuestionSchema)
+    .min(1, 'Должен быть хотя бы один вопрос')
+    .max(20, 'Максимальное количество вопросов - 20'),
+  passingScore: z
+    .number()
+    .min(0, 'Проходной балл не может быть меньше 0')
+    .max(100, 'Проходной балл не может быть больше 100'),
 });
 
-const blockSchema = z.object({
+export const BlockSchema = z.object({
   id: z.string(),
   title: z.string().min(1, 'Название блока не может быть пустым'),
-  content: z
+  content: z.string().min(1, 'Содержимое блока не может быть пустым'),
+  order: z.number().optional(),
+  test: TestSchema.optional(),
+});
+
+export const CourseStep1Schema = z.object({
+  title: z
     .string()
-    .min(10, 'Контент блока должен содержать минимум 10 символов'),
-  documentUrl: z.string().optional(),
-  test: testSchema.optional(),
+    .min(1, 'Название курса не может быть пустым')
+    .max(100, 'Название курса не может быть длиннее 100 символов'),
+  description: z
+    .string()
+    .min(1, 'Описание курса не может быть пустым')
+    .max(1000, 'Описание курса не может быть длиннее 1000 символов'),
+  category: z.enum(['PROGRAMMING', 'DESIGN', 'MARKETING', 'LANGUAGES']),
+  level: z.enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED']),
+  coverImage: z.instanceof(File).optional(),
 });
 
 export const CreateCourseSchema = z.object({
-  step1: z.object({
-    title: z.string().min(3, 'Название должно содержать минимум 3 символа'),
-    description: z
-      .string()
-      .min(10, 'Описание должно содержать минимум 10 символов'),
-    category: z.enum(['PROGRAMMING', 'DESIGN', 'MARKETING', 'LANGUAGES']),
-    level: z.enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED']),
-    coverImage: z.instanceof(File).optional(),
-  }),
+  step1: CourseStep1Schema,
   blocks: z
-    .array(blockSchema)
-    .min(1, 'Курс должен содержать хотя бы один блок'),
+    .array(BlockSchema)
+    .min(1, 'Должен быть хотя бы один блок')
+    .max(20, 'Максимальное количество блоков - 20'),
 });
 
+export type TestOption = z.infer<typeof TestOptionSchema>;
+export type TestQuestion = z.infer<typeof TestQuestionSchema>;
+export type Test = z.infer<typeof TestSchema>;
+export type Block = z.infer<typeof BlockSchema>;
+export type CourseStep1 = z.infer<typeof CourseStep1Schema>;
 export type FormData = z.infer<typeof CreateCourseSchema>;

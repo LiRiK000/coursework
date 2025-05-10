@@ -43,14 +43,61 @@ model User {
 model Course {
   id          String           @id @default(uuid())
   title       String
-  description String?
+  description String
+  category    String
+  level       String
+  coverImage  String?
+  blocks      Block[]
   author      User             @relation(fields: [authorId], references: [id])
   authorId    String
-  sections    Section[]
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   Enrollment  Enrollment[]
   favoritedBy FavoriteCourse[]
+}
+
+model Block {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  order     Int
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId  String
+  test      Test
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Test {
+  id           String     @id @default(uuid())
+  title        String
+  description  String?
+  passingScore Int
+  block        Block      @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  blockId      String     @unique
+  questions    Question[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Question {
+  id        String   @id @default(uuid())
+  question  String
+  test      Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  testId    String
+  options   Option[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Option {
+  id         String   @id @default(uuid())
+  text       String
+  isCorrect  Boolean
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Task {
@@ -71,19 +118,6 @@ model Enrollment {
   enrolledAt DateTime @default(now())
 
   @@id([userId, courseId])
-}
-
-model Section {
-  id               String             @id @default(uuid())
-  title            String
-  description      String?
-  order            Int
-  course           Course             @relation(fields: [courseId], references: [id])
-  courseId         String
-  tasks            Task[]
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  ProgressTracking ProgressTracking[]
 }
 
 model ProgressTracking {

@@ -52,3 +52,8 @@ select:-webkit-autofill:focus {
 *::-webkit-scrollbar-corner {
   background: none;
 }
+
+.w-md-editor,
+.w-md-editor-toolbar {
+  background-color: #0e0e0e !important;
+}

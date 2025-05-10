@@ -1,10 +1,12 @@
 import { api } from '@/shared/api';
-import { Course, ICreateCourse, ToggleFavoriteResponse } from './types';
+import { Course, ICreateCourse } from './types';
 
 export class CourseService {
   async getCourses(): Promise<Course[]> {
-    const response = await api.get<Course[]>('/courses');
-    return response.data;
+    const response = await api.get<{ total: number; courses: Course[] }>(
+      '/courses',
+    );
+    return response.data.courses;
   }
 
   async getCourseById(id: string): Promise<Course> {
@@ -37,10 +39,10 @@ export class CourseService {
   }
 
   async toggleFavorite(courseId: string): Promise<boolean> {
-    const response = await api.post<ToggleFavoriteResponse>(
+    const response = await api.post<{ status: string; data: boolean }>(
       `/favorites/${courseId}`,
     );
-    return response.data.data.isFavorite;
+    return response.data.data;
   }
 
   async getFavoriteCourses(): Promise<Course[]> {

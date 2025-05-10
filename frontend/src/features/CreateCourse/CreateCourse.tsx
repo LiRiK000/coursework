@@ -21,11 +21,12 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
 } from '@ant-design/icons';
-import { CreateCourseSchema, FormData } from './model/schema';
+import { CreateCourseSchema, FormData, Test, Block } from './model/schema';
 import { useCreateCourse } from './hooks/useCreateCourse';
 import MDEditor from '@uiw/react-md-editor';
 import { v4 as uuidv4 } from 'uuid';
 import type { RcFile } from 'antd/es/upload';
+import { CreateTestModal } from './ui/CreateTest';
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
@@ -33,6 +34,8 @@ const { Title, Text } = Typography;
 export const CreateCourse = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
   const [formData, setFormData] = useState<Partial<FormData>>({
     step1: {
       title: '',
@@ -45,7 +48,50 @@ export const CreateCourse = () => {
 
   const { createCourse, isLoading } = useCreateCourse();
 
+  const handleAddTestToBlock = (blockId: string) => {
+    setSelectedBlockId(blockId);
+    setIsTestModalOpen(true);
+  };
+
+  const handleTestModalClose = () => {
+    setSelectedBlockId(null);
+    setIsTestModalOpen(false);
+  };
+
+  const handleTestSave = (test: Test) => {
+    if (selectedBlockId) {
+      const newBlocks = formData.blocks?.map((block) =>
+        block.id === selectedBlockId ? { ...block, test } : block,
+      );
+      setFormData((prev) => ({ ...prev, blocks: newBlocks }));
+    }
+  };
+
+  const handleAddBlock = () => {
+    const newBlock: Block = {
+      id: uuidv4(),
+      title: '',
+      content: '',
+      test: {
+        id: uuidv4(),
+        title: '',
+        description: '',
+        questions: [],
+        passingScore: 70,
+      },
+    };
+    setFormData((prev) => ({
+      ...prev,
+      blocks: [...(prev.blocks || []), newBlock],
+    }));
+  };
+
   const validateStep = (step: number) => {
+    if (step === 1) {
+      const hasAllTests = formData.blocks?.every((block) => block.test);
+      if (!hasAllTests) return false;
+    }
+
     const partialSchema = CreateCourseSchema.pick({
       step1: step === 0 ? true : undefined,
       blocks: step === 1 ? true : undefined,
@@ -185,16 +231,26 @@ export const CreateCourse = () => {
               key={block.id}
               title={`Блок ${index + 1}`}
               extra={
-                <Button
-                  type="text"
-                  danger
-                  icon={<DeleteOutlined />}
-                  onClick={() => {
-                    const newBlocks = [...(formData.blocks || [])];
-                    newBlocks.splice(index, 1);
-                    setFormData((prev) => ({ ...prev, blocks: newBlocks }));
-                  }}
-                />
+                <Space>
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => handleAddTestToBlock(block.id)}
+                  >
+                    {block.test ? 'Редактировать тест' : 'Добавить тест'}
+                  </Button>
+
+                  <Button
+                    type="text"
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={() => {
+                      const newBlocks = [...(formData.blocks || [])];
+                      newBlocks.splice(index, 1);
+                      setFormData((prev) => ({ ...prev, blocks: newBlocks }));
+                    }}
+                  />
+                </Space>
               }
             >
               <Form layout="vertical">
@@ -242,63 +298,51 @@ export const CreateCourse = () => {
                   />
                 </Form.Item>
 
-                <Form.Item label="Дополнительные материалы">
-                  <MDEditor
-                    value={block.content}
-                    onChange={(value) => {
-                      const newBlocks = [...(formData.blocks || [])];
-                      newBlocks[index] = { ...block, content: value || '' };
-                      setFormData((prev) => ({ ...prev, blocks: newBlocks }));
-                    }}
-                    preview="edit"
-                    height={400}
-                  />
-                </Form.Item>
-
-                <Form.Item label="Дополнительные материалы">
-                  <Upload
-                    accept=".doc,.docx"
-                    maxCount={1}
-                    beforeUpload={() => {
-                      // TODO: Реализовать загрузку файла
-                      const newBlocks = [...(formData.blocks || [])];
-                      newBlocks[index] = {
-                        ...block,
-                        documentUrl: 'url-to-document',
-                      };
-                      setFormData((prev) => ({ ...prev, blocks: newBlocks }));
-                      return false;
-                    }}
-                  >
-                    <Button icon={<UploadOutlined />}>
-                      Загрузить документ
-                    </Button>
-                  </Upload>
-                </Form.Item>
+                {block.test && block.test.title.length > 0 && (
+                  <Form.Item label="Тест">
+                    <Card size="small">
+                      <Title level={3} style={{ marginTop: 0 }}>
+                        {block.test.title}
+                      </Title>
+                      <Text>{block.test.description}</Text>
+                      <div style={{ marginTop: 8 }}>
+                        <Tag color="blue">
+                          Вопросов: {block.test.questions.length}
+                        </Tag>
+                        <Tag color="green">
+                          Проходной балл: {block.test.passingScore}%
+                        </Tag>
+                      </div>
+                    </Card>
+                  </Form.Item>
+                )}
               </Form>
             </Card>
           ))}
 
           <Button
             type="dashed"
-            onClick={() => {
-              setFormData((prev) => ({
-                ...prev,
-                blocks: [
-                  ...(prev.blocks || []),
-                  {
-                    id: uuidv4(),
-                    title: '',
-                    content: '',
-                  },
-                ],
-              }));
-            }}
+            onClick={handleAddBlock}
             block
             icon={<PlusOutlined />}
           >
             Добавить блок
           </Button>
+
+          <CreateTestModal
+            open={isTestModalOpen}
+            onClose={handleTestModalClose}
+            test={
+              formData.blocks?.find((b) => b.id === selectedBlockId)?.test || {
+                id: uuidv4(),
+                title: '',
+                description: '',
+                questions: [],
+                passingScore: 70,
+              }
+            }
+            onSave={handleTestSave}
+          />
         </Space>
       ),
     },
@@ -336,13 +380,6 @@ export const CreateCourse = () => {
             {formData.blocks?.map((block, index) => (
               <Card key={block.id} title={`Блок ${index + 1}: ${block.title}`}>
                 <div dangerouslySetInnerHTML={{ __html: block.content }} />
-                {block.documentUrl && (
-                  <div style={{ marginTop: 16 }}>
-                    <Text type="secondary">
-                      Дополнительные материалы: {block.documentUrl}
-                    </Text>
-                  </div>
-                )}
               </Card>
             ))}
 
@@ -387,8 +424,17 @@ export const CreateCourse = () => {
     const errors = validate();
 
     if (errors) {
-      message.error('Пожалуйста, заполните все обязательные поля');
+      message.error(
+        'Пожалуйста, заполните все обязательные поля и добавьте тесты ко всем блокам',
+      );
       console.log(errors);
+      return;
+    }
+
+    // Проверяем наличие тестов в блоках перед отправкой
+    const hasAllTests = formData.blocks?.every((block) => block.test);
+    if (!hasAllTests) {
+      message.error('Пожалуйста, добавьте тесты ко всем блокам');
       return;
     }
 

@@ -2,12 +2,18 @@
   position: relative;
   height: 200px;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .coverImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
 }
 
 .coverPlaceholder {
@@ -35,7 +41,10 @@
 }
 
 .title {
-  margin: 0;
+  margin: 0 !important;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  font-weight: 500;
 }
 
 .descriptionContainer {
@@ -49,10 +58,33 @@
   overflow: hidden;
 }
 
+.meta {
+  margin-top: 8px;
+}
+
 .author {
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
+  color: #fefefe;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.favoriteButton {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.courseCard {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
 }

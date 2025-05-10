@@ -1,5 +1,14 @@
 import React from 'react';
-import { Card, Typography, Button, Space, Tooltip, message } from 'antd';
+import {
+  Card,
+  Typography,
+  Button,
+  Space,
+  Tooltip,
+  message,
+  Tag,
+  Popconfirm,
+} from 'antd';
 import {
   HeartOutlined,
   HeartFilled,
@@ -18,14 +27,20 @@ const { Title, Text } = Typography;
 
 interface CourseCardProps {
   course: Course;
-  onDelete?: () => void;
+  onDelete?: (courseId: string) => void;
+  onToggleFavorite?: (courseId: string) => void;
+  isFavorite?: boolean;
 }
 
-export const CourseCard: React.FC<CourseCardProps> = ({ course, onDelete }) => {
+export const CourseCard = ({
+  course,
+  onDelete,
+  onToggleFavorite,
+  isFavorite = false,
+}: CourseCardProps) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const user = useUser();
-  const [isFavorite, setIsFavorite] = React.useState(course.isFavorite);
   const [isLoading, setIsLoading] = React.useState(false);
 
   const isAuthor = user?.id === course.authorId;
@@ -43,13 +58,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onDelete }) => {
 
     try {
       setIsLoading(true);
-      const newFavoriteStatus = await courseService.toggleFavorite(course.id);
-      setIsFavorite(newFavoriteStatus);
-      message.success(
-        newFavoriteStatus
-          ? 'Курс добавлен в избранное'
-          : 'Курс удален из избранного',
-      );
+      onToggleFavorite?.(course.id);
     } catch {
       message.error('Произошла ошибка при обновлении избранного');
     } finally {
@@ -57,12 +66,11 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onDelete }) => {
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleDelete = async () => {
     try {
       await courseService.deleteCourse(course.id);
       message.success('Курс успешно удален');
-      onDelete?.();
+      onDelete?.(course.id);
     } catch {
       message.error('Ошибка при удалении курса');
     }
@@ -104,13 +112,16 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onDelete }) => {
           loading={isLoading}
         />,
         canDelete && (
-          <Button
+          <Popconfirm
             key="delete"
-            type="text"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={handleDelete}
-          />
+            title="Удалить курс?"
+            description="Это действие нельзя будет отменить"
+            onConfirm={handleDelete}
+            okText="Да"
+            cancelText="Нет"
+          >
+            <Button type="text" danger icon={<DeleteOutlined />} />
+          </Popconfirm>
         ),
       ].filter(Boolean)}
     >
@@ -131,6 +142,10 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onDelete }) => {
                 <UserOutlined /> {course.author.fullname}
               </Text>
             </Tooltip>
+            <Space>
+              <Tag color="blue">{course.category}</Tag>
+              <Tag color="green">{course.level}</Tag>
+            </Space>
           </Space>
         }
       />

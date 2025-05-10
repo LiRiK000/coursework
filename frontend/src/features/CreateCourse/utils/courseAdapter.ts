@@ -7,7 +7,7 @@ export const courseAdapter = (data: FormData): ICreateCourse => {
     description: data.step1.description,
     category: data.step1.category,
     level: data.step1.level,
-    coverImage: data.step1.coverImage,
+    coverImage: data.step1.coverImage?.name,
     blocks: data.blocks,
   };
 };

@@ -32,12 +32,9 @@ export interface Block {
   test: Test;
 }
 
-export interface Author {
-  id: string;
-  fullname: string;
-  email: string;
-  role: string;
-  avatar: string;
+export interface CreateCourseDto {
+  step1: CourseStep1;
+  blocks: Block[];
 }
 
 export interface Course {
@@ -46,8 +43,6 @@ export interface Course {
   description: string;
   category: string;
   level: string;
-  author: Author;
-  isFavorite: boolean;
   coverImage?: string;
   blocks: Block[];
   authorId: string;
@@ -62,13 +57,4 @@ export interface CourseResponse {
 export interface CoursesResponse {
   courses: Course[];
   total: number;
-}
-
-export interface ICreateCourse {
-  title: string;
-  description: string;
-  category: string;
-  level: string;
-  coverImage?: string;
-  blocks: Block[];
 }

@@ -27,7 +27,7 @@ export const FavoriteTab = () => {
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
       <Typography.Title level={2}>Избранные курсы</Typography.Title>
       {courses.map((course) => (
-        <CourseCard key={course.id} course={course} />
+        <CourseCard key={course.id} course={course} isFavorite={true} />
       ))}
     </Space>
   );

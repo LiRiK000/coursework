@@ -1,112 +1,142 @@
-import { Request, Response } from 'express';
-import { prisma } from '../lib/prisma';
-import { CustomError } from '../shared/errors/CustomError';
+import { Request, Response, NextFunction } from 'express';
+import { CreateCourseDto } from '../types/course.types';
+import { ApiError } from '../lib/ApiError';
+import { CourseService } from '../services/course.service';
 
 class CourseController {
-  async create(req: Request, res: Response) {
-    const { title, description } = req.body;
-    const authorId = req.user.id;
+  private courseService: CourseService;
 
-    const course = await prisma.course.create({
-      data: {
-        title,
-        description,
-        authorId,
-      },
-    });
-
-    res.status(201).json(course);
+  constructor() {
+    this.courseService = new CourseService();
   }
 
-  async getAll(req: Request, res: Response) {
-    const courses = await prisma.course.findMany({
-      include: {
-        sections: true,
-        author: {
-          select: {
-            id: true,
-            email: true,
-            fullname: true,
-          },
-        },
-      },
-    });
+  create = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const courseData: CreateCourseDto = req.body;
+      const userId = req.user?.id;
 
-    res.json(courses);
-  }
+      if (!userId) {
+        throw ApiError.Unauthorized();
+      }
 
-  async getById(req: Request, res: Response) {
-    const { id } = req.params;
-
-    const course = await prisma.course.findUnique({
-      where: { id },
-      include: {
-        sections: true,
-        author: {
-          select: {
-            id: true,
-            email: true,
-            fullname: true,
-          },
-        },
-      },
-    });
-
-    if (!course) {
-      throw new CustomError('Курс не найден', 404);
+      const course = await this.courseService.createCourse(courseData, userId);
+      res.status(201).json({ course });
+    } catch (error) {
+      next(error);
     }
+  };
 
-    res.json(course);
-  }
-
-  async update(req: Request, res: Response) {
-    const { id } = req.params;
-    const { title, description } = req.body;
-
-    const course = await prisma.course.findUnique({
-      where: { id },
-    });
-
-    if (!course) {
-      throw new CustomError('Курс не найден', 404);
+  getAll = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const courses = await this.courseService.getAllCourses();
+      res.json({ courses, total: courses.length });
+    } catch (error) {
+      next(error);
     }
+  };
 
-    if (course.authorId !== req.user.id) {
-      throw new CustomError('Нет прав для редактирования этого курса', 403);
+  getById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const course = await this.courseService.getCourseById(id);
+
+      if (!course) {
+        throw ApiError.NotFound('Курс не найден');
+      }
+
+      res.json({ course });
+    } catch (error) {
+      next(error);
     }
+  };
 
-    const updatedCourse = await prisma.course.update({
-      where: { id },
-      data: {
-        title,
-        description,
-      },
-    });
+  update = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const courseData = req.body;
+      const userId = req.user?.id;
 
-    res.json(updatedCourse);
-  }
+      if (!userId) {
+        throw ApiError.Unauthorized();
+      }
 
-  async delete(req: Request, res: Response) {
-    const { id } = req.params;
-
-    const course = await prisma.course.findUnique({
-      where: { id },
-    });
-
-    if (!course) {
-      throw new CustomError('Курс не найден', 404);
+      const course = await this.courseService.updateCourse(
+        id,
+        courseData,
+        userId,
+      );
+      res.json({ course });
+    } catch (error) {
+      next(error);
     }
+  };
 
-    if (course.authorId !== req.user.id) {
-      throw new CustomError('Нет прав для удаления этого курса', 403);
+  delete = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        throw ApiError.Unauthorized();
+      }
+
+      await this.courseService.deleteCourse(id, userId);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
     }
+  };
 
-    await prisma.course.delete({
-      where: { id },
-    });
+  getFavorites = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.user?.id;
 
-    res.status(204).send();
-  }
+      if (!userId) {
+        throw ApiError.Unauthorized();
+      }
+
+      const courses = await this.courseService.getFavoriteCourses(userId);
+      res.json({ courses, total: courses.length });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  addToFavorites = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        throw ApiError.Unauthorized();
+      }
+
+      await this.courseService.addToFavorites(id, userId);
+      res.status(201).send();
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  removeFromFavorites = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        throw ApiError.Unauthorized();
+      }
+
+      await this.courseService.removeFromFavorites(id, userId);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export const courseController = new CourseController();
