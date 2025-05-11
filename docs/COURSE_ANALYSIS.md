@@ -1,207 +1,166 @@
-# Анализ функционала курсов
+# Анализ системы курсов
 
-## 1. Структура курса
+## Текущая реализация
 
-### 1.1 Основная информация
+### Структура курса
 
-- Название курса
-- Описание
-- Категория
-- Уровень сложности (начальный, средний, продвинутый)
-- Обложка курса
+1. Основная информация
 
-### 1.2 Блоки курса
+   - Название курса
+   - Описание
+   - Обложка
+   - Категория
+   - Уровень сложности
+   - Автор
 
-Каждый блок состоит из:
+2. Содержание курса
+   - Последовательность блоков
+   - Тесты после блоков
 
-1. Теоретической части
-   - Текст с форматированием (markdown)
-   - Изображения
-   - Видео
-   - Ссылки на дополнительные материалы
-   - файл
-2. Практической части
-   - Тесты
-   - Задания
-   - Проекты
+### Система тестирования
 
-## 2. Создание курса (мультистеп форма)
+1. Создание тестов
 
-### 2.1 Шаг 1: Основная информация
+   - Добавление вопросов с вариантами ответов
+   - Настройка правильных ответов
+   - Настройка процента для успешного прохождения
 
-- Заполнение базовой информации о курсе
-- Загрузка обложки
-- Выбор категории и уровня сложности
+2. Прохождение тестов
+   - Отображение вопросов с вариантами ответов
+   - Выбор одного правильного ответа
+   - Бинарная проверка результатов (правильно/неправильно)
+   - Отображение правильных ответов
 
-### 2.2 Шаг 2: Структура курса
+### Управление курсами
 
-- Создание блоков
-- Определение порядка блоков
+1. Создание курса
 
-### 2.3 Шаг 3: Содержимое блоков
+   - Базовая информация
+   - Загрузка обложки
+   - Структурирование контента по блокам
+   - Добавление тестов к блокам
 
-Для каждого блока:
+2. Редактирование курса
 
-- Создание теоретической части
-- Добавление тестов
+   - Изменение информации
+   - Обновление контента
+   - Управление тестами
 
-### 2.4 Шаг 4: Предпросмотр и публикация
+3. Удаление курса
+   - Подтверждение действия
+   - Очистка связанных данных
 
-- Предпросмотр курса
-- Подтверждение
-- Публикация
+### Пользовательский интерфейс
 
-## 3. Прохождение курса
+1. Просмотр курсов
 
-### 3.1 Интерфейс студента
+   - Список доступных курсов
+   - Поиск по названию
 
-- Прогресс прохождения (добавить в профиль)
-- Навигация по блокам
-- Отметка о прохождении блоков
-- Система достижений (добавить новые ачивки, или дать возможность авторам создавать свои ачивки)
+2. Детальная информация
 
-### 3.2 Тестирование
+   - Полное описание курса
+   - Содержание
+   - Информация об авторе
 
-- Различные типы вопросов:
-  - Один правильный ответ
-  - Несколько правильных ответов
-  - Сопоставление
-- Система оценки
-- Обратная связь
+3. Избранное
+   - Добавление в избранное
+   - Удаление из избранного
+   - Список избранных курсов
 
-### 3.3 Практические задания
+## Техническая реализация
 
-- Загрузка решений
-- Проверка заданий
-- Комментарии преподавателя
-- Система оценки
-
-## 4. Технические аспекты
-
-### 4.1 База данных
-
-```prisma
-model Course {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  category    String
-  level       String
-  duration    Int
-  coverImage  String?
-  blocks      Block[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Block {
-  id          String   @id @default(cuid())
-  title       String
-  order       Int
-  courseId    String
-  course      Course   @relation(fields: [courseId], references: [id])
-  theory      Theory?
-  test        Test?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Theory {
-  id        String   @id @default(cuid())
-  content   String   // markdown
-  blockId   String   @unique
-  block     Block    @relation(fields: [blockId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Test {
-  id        String    @id @default(cuid())
-  blockId   String    @unique
-  block     Block     @relation(fields: [blockId], references: [id])
-  questions Question[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
-
-model Question {
-  id        String   @id @default(cuid())
-  type      String   // single, multiple, open, matching
-  text      String
-  options   Json?    // для вопросов с вариантами ответов
-  answer    Json     // правильный ответ
-  testId    String
-  test      Test     @relation(fields: [testId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-```
-
-### 4.2 API Endpoints
+### Модели данных
 
 ```typescript
-// Курсы
-GET    /api/courses
-POST   /api/courses
-GET    /api/courses/:id
-PUT    /api/courses/:id
-DELETE /api/courses/:id
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  coverImage?: string;
+  category: string;
+  level: string;
+  authorId: string;
+  author: User;
+  blocks: Block[];
+}
 
-// Блоки
-GET    /api/courses/:courseId/blocks
-POST   /api/courses/:courseId/blocks
-PUT    /api/blocks/:id
-DELETE /api/blocks/:id
+interface Block {
+  id: string;
+  title: string;
+  content: string;
+  order: number;
+  courseId: string;
+  test?: Test;
+}
 
-// Теория
-GET    /api/blocks/:blockId/theory
-POST   /api/blocks/:blockId/theory
-PUT    /api/theory/:id
+interface Test {
+  id: string;
+  title: string;
+  questions: Question[];
+  passingScore: number;
+  blockId: string;
+}
 
-// Тесты
-GET    /api/blocks/:blockId/test
-POST   /api/blocks/:blockId/test
-PUT    /api/tests/:id
-POST   /api/tests/:id/submit
+interface Question {
+  id: string;
+  text: string;
+  options: Option[];
+  correctOptionId: string;
+}
+
+interface Option {
+  id: string;
+  text: string;
+}
 ```
 
-## 5. UI/UX
+### API Endpoints
 
-### 5.1 Создание курса
+1. Курсы
 
-- Мультистеп форма с прогресс-баром
-- Drag-and-drop для блоков
-- WYSIWYG редактор для теории
-- Конструктор тестов
+   - GET /api/courses - получение списка курсов
+   - GET /api/courses/:id - получение информации о курсе
+   - POST /api/courses - создание курса
+   - PUT /api/courses/:id - обновление курса
+   - DELETE /api/courses/:id - удаление курса
 
-### 5.2 Прохождение курса
+2. Блоки
 
-- Адаптивный дизайн
-- Интерактивная навигация
-- Визуализация прогресса
-- Уведомления о новых материалах
+   - GET /api/courses/:courseId/blocks - получение блоков курса
+   - POST /api/courses/:courseId/blocks - создание блока
+   - PUT /api/blocks/:id - обновление блока
+   - DELETE /api/blocks/:id - удаление блока
 
-## 6. Дополнительные функции
+3. Тесты
+   - GET /api/blocks/:blockId/test - получение теста блока
+   - POST /api/blocks/:blockId/test - создание теста
+   - PUT /api/tests/:id - обновление теста
+   - DELETE /api/tests/:id - удаление теста
+   - POST /api/tests/:id/submit - отправка ответов
 
-### 6.1 Для преподавателей
+## Планы по развитию
 
-- Статистика прохождения
-- Аналитика успеваемости
-- Система комментариев
-- Управление доступом
+### 1. Система прохождения курса
 
-### 6.2 Для студентов
+- Реализация интерфейса прохождения курса
+- Блокировка следующего блока до завершения текущего
+- Отслеживание прогресса по формуле: (количество пройденных блоков / общее количество блоков) \* 100%
 
-- Заметки
-- Закладки
-- Обсуждения
-- Сертификаты
+### 2. Система тестирования
 
-## 7. Следующие шаги
+- Улучшение интерфейса прохождения тестов
+- Добавление таймера на прохождение
+- Подробная статистика результатов
 
-1. Создание базовой структуры базы данных
-2. Разработка API endpoints
-3. Реализация мультистеп формы создания курса
-4. Разработка конструктора тестов
-5. Создание интерфейса прохождения курса
-6. Тестирование и оптимизация
+### 3. Система достижений
+
+- Интеграция существующей системы достижений с прохождением курсов
+- Бейджи за успешное прохождение тестов
+- Бейджи за завершение курса
+
+### 4. Система сертификатов
+
+- Интеграция существующей системы сертификатов
+- Выдача сертификатов за успешное прохождение курса
+- Учет результатов тестов при выдаче сертификата
