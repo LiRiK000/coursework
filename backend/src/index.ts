@@ -12,6 +12,7 @@ import { courseRouter } from './routes/course.routes';
 import { achievementRouter } from './routes/achievement.routes';
 import { authorshipRequestRouter } from './routes/authorshipRequest.routes';
 import { favoriteRouter } from './routes/favorite.routes';
+import { setupSwagger } from './lib/swagger';
 
 dotenv.config();
 
@@ -30,6 +31,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));
 
+// Swagger setup
+setupSwagger(app);
+
 // Routes
 app.use('/api/auth', authRouter);
 app.use('/api/certificates', certificateRouter);
@@ -46,4 +50,5 @@ app.use(errorHandler);
 
 app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}/api`);
+  console.log(`Swagger documentation available at http://localhost:${port}/api-docs`);
 });
