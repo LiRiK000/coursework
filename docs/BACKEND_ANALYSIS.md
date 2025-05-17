@@ -312,5 +312,5 @@ model FavoriteCourse {
 2. Расширение системы кэширования
 3. Оптимизация загрузки файлов
 4. Улучшение обработки ошибок
-5. Добавление документации API (Swagger)
-6. Rate limiting (https://www.npmjs.com/package/express-rate-limit)
+5. ~~Добавление документации API (Swagger)~~
+6. ~~Rate limiting (https://www.npmjs.com/package/express-rate-limit)~~

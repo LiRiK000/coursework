@@ -6,6 +6,7 @@ import { progressRouter } from './routes/progress.routes';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { rateLimit } from 'express-rate-limit'
 import { errorHandler } from './middleware/error.middleware';
 import express from 'express';
 import { courseRouter } from './routes/course.routes';
@@ -24,8 +25,16 @@ const corsOptions = {
   optionsSuccessStatus: 200,
   credentials: true,
 };
+// Rate limiting
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+	standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+})
 
 // Middleware
+app.use(limiter);
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
