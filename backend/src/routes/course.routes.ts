@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { protect, restrictTo } from '../middleware/auth.middleware';
 import { courseController } from '../controllers/course.controller';
+import { upload } from '../config/multer.config';
 
 /**
  * @swagger
@@ -87,6 +88,28 @@ router.use(protect);
  */
 router.get('/', courseController.getAll);
 
+// FIXME
+/**
+ * @swagger
+ * /api/courses:
+ *   get:
+ *     summary: Получение инфо по курсу
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: информация по курсу
+ *         content:
+ *           application/json:
+ *             schema:
+ *               items:
+ *                 $ref: '#/components/schemas/Course'
+ *       401:
+ *         description: Не авторизован
+ */
+router.get('/:id', courseController.getById);
+
 /**
  * @swagger
  * /api/courses:
@@ -113,76 +136,18 @@ router.get('/', courseController.getAll);
  *       403:
  *         description: Нет прав для создания курса
  */
-router.post('/', restrictTo(['ADMIN'], ['AUTHOR']), courseController.create);
-
-/**
- * @swagger
- * /api/courses/{id}:
- *   get:
- *     summary: Получение курса по ID
- *     tags: [Courses]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID курса
- *     responses:
- *       200:
- *         description: Информация о курсе
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Course'
- *       401:
- *         description: Не авторизован
- *       404:
- *         description: Курс не найден
- */
-router.get('/:id', courseController.getById);
-
-/**
- * @swagger
- * /api/courses/{id}:
- *   patch:
- *     summary: Обновление курса
- *     tags: [Courses]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID курса
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/CourseUpdate'
- *     responses:
- *       200:
- *         description: Курс успешно обновлен
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Course'
- *       401:
- *         description: Не авторизован
- *       403:
- *         description: Нет прав для обновления курса
- *       404:
- *         description: Курс не найден
- */
-router.patch(
-  '/:id',
+router.post(
+  '/',
   restrictTo(['ADMIN'], ['AUTHOR']),
-  courseController.update,
+  upload.fields([
+    { name: 'coverImage', maxCount: 1 },
+    // Поддерживаем до 10 блоков с теоретическими материалами
+    ...Array.from({ length: 10 }, (_, i) => ({
+      name: `theoreticalMaterial_${i}`,
+      maxCount: 1,
+    })),
+  ]),
+  courseController.create,
 );
 
 /**

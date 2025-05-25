@@ -92,7 +92,7 @@ export const AllCoursesTab = () => {
       {courses.length === 0 ? (
         <Empty description="Курсы не найдены" />
       ) : (
-        <Row gutter={[24, 24]}>
+        <Row gutter={[24, 24]} style={{ gap: '16px' }}>
           {courses.map((course) => (
             <CourseCard
               key={course.id}

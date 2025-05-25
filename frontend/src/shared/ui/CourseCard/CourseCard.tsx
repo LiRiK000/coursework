@@ -52,6 +52,8 @@ export const CourseCard = ({
     await onToggleFavorite(course.id);
   };
 
+  console.log(course.coverImage);
+
   return (
     <Card
       hoverable
@@ -65,7 +67,7 @@ export const CourseCard = ({
           {course.coverImage ? (
             <img
               alt={course.title}
-              src={course.coverImage}
+              src={`http://localhost:3001${course.coverImage}`}
               className={styles.coverImage}
             />
           ) : (

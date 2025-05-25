@@ -298,6 +298,31 @@ export const CreateCourse = () => {
                   />
                 </Form.Item>
 
+                <Form.Item label="Теоретический материал">
+                  <Upload
+                    accept=".docx"
+                    maxCount={1}
+                    beforeUpload={(file: RcFile) => {
+                      const newBlocks = [...(formData.blocks || [])];
+                      newBlocks[index] = {
+                        ...block,
+                        theoreticalMaterial: file,
+                      };
+                      setFormData((prev) => ({ ...prev, blocks: newBlocks }));
+                      return false;
+                    }}
+                  >
+                    <Button icon={<UploadOutlined />}>
+                      Загрузить материал
+                    </Button>
+                  </Upload>
+                  {block.theoreticalMaterial && (
+                    <Text style={{ marginLeft: 8 }}>
+                      {block.theoreticalMaterial.name}
+                    </Text>
+                  )}
+                </Form.Item>
+
                 {block.test && block.test.title.length > 0 && (
                   <Form.Item label="Тест">
                     <Card size="small">

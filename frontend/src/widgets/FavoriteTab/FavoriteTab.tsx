@@ -1,4 +1,4 @@
-import { Empty, message, Space, Spin, Typography } from 'antd';
+import { Empty, message, Row, Space, Spin, Typography } from 'antd';
 import { CourseCard } from '@/shared/ui/CourseCard';
 import styles from './FavoriteTab.module.scss';
 import { useGetFavorites } from './hooks/useGetFavorites';
@@ -49,14 +49,16 @@ export const FavoriteTab = () => {
   return (
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
       <Typography.Title level={2}>Избранные курсы</Typography.Title>
-      {courses.map((course) => (
-        <CourseCard
-          key={course.id}
-          course={course}
-          isFavorite={true}
-          onToggleFavorite={handleToggleFavorite}
-        />
-      ))}
+      <Row gutter={[24, 24]} style={{ gap: '16px' }}>
+        {courses.map((course) => (
+          <CourseCard
+            key={course.id}
+            course={course}
+            isFavorite={true}
+            onToggleFavorite={handleToggleFavorite}
+          />
+        ))}
+      </Row>
     </Space>
   );
 };

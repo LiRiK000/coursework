@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { CreateCourseDto } from '../types/course.types';
+import { CreateCourseDto, CourseBlock } from '../types/course.types';
 import { ApiError } from '../lib/ApiError';
 import { CourseService } from '../services/course.service';
+import path from 'path';
 
 class CourseController {
   private courseService: CourseService;
@@ -12,6 +13,10 @@ class CourseController {
 
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const files = req.files as {
+        [fieldname: string]: Express.Multer.File[];
+      };
+
       const courseData: CreateCourseDto = req.body;
       const userId = req.user?.id;
 
@@ -19,7 +24,43 @@ class CourseController {
         throw ApiError.Unauthorized();
       }
 
-      const course = await this.courseService.createCourse(courseData, userId);
+      const fullCoverImagePath = files?.coverImage?.[0]?.path;
+      const coverImagePath = fullCoverImagePath
+        ? '/uploads/' +
+          path.relative(
+            path.join(__dirname, '../../uploads'),
+            fullCoverImagePath,
+          )
+        : undefined;
+
+      const blocks = courseData.blocks?.map(
+        (block: CourseBlock, index: number) => {
+          const fullTheoreticalMaterialPath =
+            files?.[`theoreticalMaterial_${index}`]?.[0]?.path;
+
+          const theoreticalMaterialPath = fullTheoreticalMaterialPath
+            ? '/uploads/' +
+              path.relative(
+                path.join(__dirname, '../../uploads'),
+                fullTheoreticalMaterialPath,
+              )
+            : undefined;
+
+          return {
+            ...block,
+            theoreticalMaterialPath,
+          };
+        },
+      );
+
+      const course = await this.courseService.createCourse(
+        {
+          ...courseData,
+          coverImagePath,
+          blocks,
+        },
+        userId,
+      );
       res.status(201).json({ course });
     } catch (error) {
       next(error);
@@ -45,27 +86,6 @@ class CourseController {
         throw ApiError.NotFound('Курс не найден');
       }
 
-      res.json({ course });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  update = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { id } = req.params;
-      const courseData = req.body;
-      const userId = req.user?.id;
-
-      if (!userId) {
-        throw ApiError.Unauthorized();
-      }
-
-      const course = await this.courseService.updateCourse(
-        id,
-        courseData,
-        userId,
-      );
       res.json({ course });
     } catch (error) {
       next(error);

@@ -3,36 +3,38 @@ import { ApiError } from '../lib/ApiError';
 import { Prisma } from '@prisma/client';
 import {
   CreateCourseDto,
-  UpdateCourseDto,
   CourseWithDetails,
+  CourseBlock,
 } from '../types/course.types';
 
 export class CourseService {
   async createCourse(courseData: CreateCourseDto, authorId: string) {
-    const { blocks, ...restData } = courseData;
+    const { blocks, coverImagePath, ...restData } = courseData;
 
     return prisma.course.create({
       data: {
         ...restData,
         authorId,
+        coverImage: coverImagePath,
         blocks: {
-          create: blocks?.map((block, index) => ({
+          create: blocks?.map((block: CourseBlock, index: number) => ({
             title: block.title,
             content: block.content,
             order: block.order ?? index,
+            theoreticalMaterial: block.theoreticalMaterialPath,
             test: block.test
               ? {
                   create: {
                     title: block.test.title,
                     description: block.test.description,
-                    passingScore: block.test.passingScore,
+                    passingScore: Number(block.test.passingScore),
                     questions: {
                       create: block.test.questions.map((question) => ({
                         question: question.question,
                         options: {
                           create: question.options.map((option) => ({
                             text: option.text,
-                            isCorrect: option.isCorrect,
+                            isCorrect: option.isCorrect === 'true',
                           })),
                         },
                       })),
@@ -192,75 +194,6 @@ export class CourseService {
     });
 
     return course as CourseWithDetails | null;
-  }
-
-  async updateCourse(id: string, courseData: UpdateCourseDto, userId: string) {
-    const course = await prisma.course.findUnique({
-      where: { id },
-    });
-
-    if (!course) {
-      throw ApiError.NotFound('Курс не найден');
-    }
-
-    if (course.authorId !== userId) {
-      throw ApiError.Forbidden('Нет прав для редактирования этого курса');
-    }
-
-    return prisma.course.update({
-      where: { id },
-      data: {
-        title: courseData.title,
-        description: courseData.description,
-        blocks: {
-          create: courseData.blocks?.map((block, index) => ({
-            title: block.title,
-            content: block.content,
-            order: block.order ?? index,
-            test: block.test
-              ? {
-                  create: {
-                    title: block.test.title,
-                    description: block.test.description,
-                    passingScore: block.test.passingScore,
-                    questions: {
-                      create: block.test.questions.map((q) => ({
-                        question: q.question,
-                        options: {
-                          create: q.options.map((opt) => ({
-                            text: opt.text,
-                            isCorrect: opt.isCorrect,
-                          })),
-                        },
-                      })),
-                    },
-                  },
-                }
-              : undefined,
-          })),
-        },
-      },
-      include: {
-        author: {
-          select: {
-            id: true,
-            email: true,
-            fullname: true,
-          },
-        },
-        sections: {
-          orderBy: {
-            order: 'asc',
-          },
-          select: {
-            id: true,
-            title: true,
-            description: true,
-            order: true,
-          },
-        },
-      },
-    });
   }
 
   async deleteCourse(id: string, userId: string) {

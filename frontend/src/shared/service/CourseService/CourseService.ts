@@ -1,5 +1,5 @@
 import { api } from '@/shared/api';
-import { Course, ICreateCourse } from './types';
+import { Course } from './types';
 
 export class CourseService {
   async getCourses(search?: string): Promise<Course[]> {
@@ -19,9 +19,17 @@ export class CourseService {
     return response.data;
   }
 
-  async createCourse(courseData: ICreateCourse): Promise<Course> {
-    const response = await api.post('/courses', courseData);
-    return response.data;
+  async createCourse(courseData: FormData): Promise<Course> {
+    const response = await api.post<{ course: Course }>(
+      '/courses',
+      courseData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+    return response.data.course;
   }
 
   async updateCourse(id: string, courseData: FormData): Promise<Course> {

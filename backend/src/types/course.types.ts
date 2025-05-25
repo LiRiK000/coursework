@@ -1,30 +1,32 @@
 import { Course, User, Block, Question, Option } from '@prisma/client';
 
+export interface CourseBlock {
+  title: string;
+  content: string;
+  order?: number;
+  theoreticalMaterialPath?: string;
+  test?: {
+    title: string;
+    description: string;
+    passingScore: string;
+    questions: {
+      question: string;
+      options: {
+        text: string;
+        isCorrect: string;
+      }[];
+    }[];
+  };
+}
+
 export interface CreateCourseDto {
   title: string;
   description: string;
   category: string;
   level: string;
-  blocks?: {
-    title: string;
-    content: string;
-    order?: number;
-    test?: {
-      title: string;
-      description: string;
-      passingScore: number;
-      questions: {
-        question: string;
-        options: {
-          text: string;
-          isCorrect: boolean;
-        }[];
-      }[];
-    };
-  }[];
+  coverImagePath?: string;
+  blocks?: CourseBlock[];
 }
-
-export interface UpdateCourseDto extends Partial<CreateCourseDto> {}
 
 export interface CourseWithAuthor extends Course {
   author: Pick<User, 'id' | 'email' | 'fullname'>;

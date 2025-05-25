@@ -38,6 +38,7 @@ export const BlockSchema = z.object({
   content: z.string().min(1, 'Содержимое блока не может быть пустым'),
   order: z.number().optional(),
   test: TestSchema.optional(),
+  theoreticalMaterial: z.instanceof(File).optional(),
 });
 
 export const CourseStep1Schema = z.object({
