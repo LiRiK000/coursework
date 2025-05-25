@@ -5,6 +5,7 @@ import { Loader } from '@/shared/ui/Loader';
 import { authService } from '@/shared/service/AuthService';
 import { useUser } from '@/entities/User';
 import { useShallow } from 'zustand/shallow';
+import { UserProfile } from '@/shared/service/UserService';
 
 interface ProtectedWrapperProps {
   children: ReactNode;
@@ -40,7 +41,7 @@ export const ProtectedWrapper: FC<ProtectedWrapperProps> = ({
     return <Navigate to="/not-allowed" state={{ from: location }} replace />;
   }
 
-  setUser(user);
+  setUser(user as UserProfile);
 
   return <>{children}</>;
 };

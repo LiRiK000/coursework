@@ -9,6 +9,7 @@ import { ProtectedWrapper } from '../providers/ProtectedWrapper';
 import { Suspense } from 'react';
 import { Loader } from '@/shared/ui/Loader';
 import { CoursePage } from '@/pages/CoursePage';
+import { CourseLearn } from '@/pages/CourseLearn';
 
 export const CoreRouter = () => (
   <BrowserRouter>
@@ -37,6 +38,16 @@ export const CoreRouter = () => (
           <ProtectedWrapper>
             <Suspense fallback={<Loader fullscreen />}>
               <CoursePage />
+            </Suspense>
+          </ProtectedWrapper>
+        }
+      />
+      <Route
+        path="/courses/:id/learn"
+        element={
+          <ProtectedWrapper>
+            <Suspense fallback={<Loader fullscreen />}>
+              <CourseLearn />
             </Suspense>
           </ProtectedWrapper>
         }

@@ -62,4 +62,32 @@ export class CourseService {
     );
     return response.data.data;
   }
+
+  async getCourseForLearning(id: string): Promise<{ course: Course }> {
+    const response = await api.get<{ course: Course }>(`/courses/${id}/learn`);
+    return response.data;
+  }
+
+  async startCourse(id: string): Promise<void> {
+    await api.post(`/courses/${id}/start`);
+  }
+
+  async completeBlock(blockId: string): Promise<void> {
+    await api.post(`/courses/blocks/${blockId}/complete`);
+  }
+
+  async submitTest(testId: string, data: { answers: Array<{questionId: string, optionId: string}> }): Promise<{ isPassed: boolean; score: number }> {
+    const response = await api.post<{ isPassed: boolean; score: number }>(
+      `/courses/tests/${testId}/submit`,
+      data
+    );
+    return response.data;
+  }
+
+  async getCourseProgress(id: string): Promise<{ completedBlocks: { blockId: string }[]; isCompleted: boolean }> {
+    const response = await api.get<{progress: { completedBlocks: { blockId: string }[]; isCompleted: boolean }}>(
+      `/courses/${id}/progress`
+    );
+    return response.data.progress;
+  }
 }

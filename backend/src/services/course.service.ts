@@ -6,6 +6,7 @@ import {
   CourseWithDetails,
   CourseBlock,
 } from '../types/course.types';
+import { randomUUID } from 'crypto';
 
 export class CourseService {
   async createCourse(courseData: CreateCourseDto, authorId: string) {
@@ -286,5 +287,346 @@ export class CourseService {
         },
       },
     });
+  }
+
+  async getCourseForLearning(courseId: string, userId: string) {
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            fullname: true,
+          },
+        },
+        blocks: {
+          orderBy: {
+            order: 'asc',
+          },
+          include: {
+            test: {
+              include: {
+                questions: {
+                  include: {
+                    options: {
+                      select: {
+                        id: true,
+                        text: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            CompletionStatus: {
+              where: {
+                userId,
+              },
+            },
+          },
+        },
+        CompletionStatus: {
+          where: {
+            userId,
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      throw ApiError.NotFound('Курс не найден');
+    }
+
+    const courseStarted = course.CompletionStatus.length > 0;
+
+    if (!courseStarted) {
+      await this.startCourse(courseId, userId);
+    }
+
+    return {
+      ...course,
+      blocks: course.blocks.map((block) => ({
+        ...block,
+        isCompleted: block.CompletionStatus.length > 0 && block.CompletionStatus[0].isCompleted,
+        isAvailable: this.isBlockAvailable(block, course.blocks, userId),
+        CompletionStatus: undefined,
+      })),
+      CompletionStatus: undefined,
+    };
+  }
+
+  private isBlockAvailable(currentBlock: any, allBlocks: any[], userId: string): boolean {
+    if (currentBlock.order === 0) return true;
+
+    const prevBlock = allBlocks.find(b => b.order === currentBlock.order - 1);
+
+    if (!prevBlock) return true;
+
+    return prevBlock.CompletionStatus.length > 0 && prevBlock.CompletionStatus[0].isCompleted;
+  }
+
+  async startCourse(courseId: string, userId: string) {
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+    });
+
+    if (!course) {
+      throw ApiError.NotFound('Курс не найден');
+    }
+
+    await prisma.completionStatus.create({
+      data: {
+        userId,
+        courseId,
+        isCompleted: false,
+      },
+    });
+
+    return { message: 'Курс начат' };
+  }
+
+  async completeBlock(blockId: string, userId: string) {
+    const block = await prisma.block.findUnique({
+      where: { id: blockId },
+      include: {
+        course: true,
+        test: true,
+      },
+    });
+
+    if (!block) {
+      throw ApiError.NotFound('Блок не найден');
+    }
+
+    if (block.test) {
+      const testCompleted = await prisma.completionStatus.findFirst({
+        where: {
+          userId,
+          blockId,
+          isCompleted: true,
+        },
+      });
+
+      if (!testCompleted) {
+        throw ApiError.BadRequest('Необходимо пройти тест для завершения блока');
+      }
+    }
+
+    const existingStatus = await prisma.completionStatus.findFirst({
+      where: {
+        userId,
+        courseId: block.courseId,
+        blockId,
+        taskId: null,
+      },
+    });
+
+    if (existingStatus) {
+      await prisma.completionStatus.update({
+        where: { id: existingStatus.id },
+        data: { isCompleted: true },
+      });
+    } else {
+      await prisma.completionStatus.create({
+        data: {
+          userId,
+          courseId: block.courseId,
+          blockId,
+          taskId: null,
+          isCompleted: true,
+        },
+      });
+    }
+
+    await this.checkCourseCompletion(block.courseId, userId);
+
+    return { message: 'Блок завершен' };
+  }
+
+  async submitTest(testId: string, answers: Array<{questionId: string, optionId: string}>, userId: string) {
+    const test = await prisma.test.findUnique({
+      where: { id: testId },
+      include: {
+        block: true,
+        questions: {
+          include: {
+            options: true,
+          },
+        },
+      },
+    });
+
+    if (!test) {
+      throw ApiError.NotFound('Тест не найден');
+    }
+
+    let correctAnswers = 0;
+    const totalQuestions = test.questions.length;
+    const results = [];
+
+    for (const answer of answers) {
+      const question = test.questions.find(q => q.id === answer.questionId);
+      if (!question) continue;
+
+      const selectedOption = question.options.find(o => o.id === answer.optionId);
+      if (!selectedOption) continue;
+
+      const isCorrect = selectedOption.isCorrect;
+      if (isCorrect) correctAnswers++;
+
+      results.push({
+        questionId: question.id,
+        isCorrect,
+        correctOption: question.options.find(o => o.isCorrect)?.id,
+      });
+    }
+
+    const percentage = (correctAnswers / totalQuestions) * 100;
+    const isPassed = percentage >= test.passingScore;
+
+    if (isPassed) {
+      const existingStatus = await prisma.completionStatus.findFirst({
+        where: {
+          userId,
+          courseId: test.block.courseId,
+          blockId: test.block.id,
+          taskId: null,
+        },
+      });
+
+      if (existingStatus) {
+        await prisma.completionStatus.update({
+          where: { id: existingStatus.id },
+          data: { isCompleted: true },
+        });
+      } else {
+        await prisma.completionStatus.create({
+          data: {
+            userId,
+            courseId: test.block.courseId,
+            blockId: test.block.id,
+            taskId: null,
+            isCompleted: true,
+          },
+        });
+      }
+
+
+      if (correctAnswers === totalQuestions) {
+        // Логика для достижения будет добавлена позже
+      }
+    }
+
+    return {
+      isPassed,
+      score: percentage,
+      correctAnswers,
+      totalQuestions,
+      passingScore: test.passingScore,
+      results,
+    };
+  }
+
+  async getCourseProgress(courseId: string, userId: string) {
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      include: {
+        blocks: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      throw ApiError.NotFound('Курс не найден');
+    }
+
+    const completionStatuses = await prisma.completionStatus.findMany({
+      where: {
+        userId,
+        courseId,
+      },
+    });
+
+    const totalBlocks = course.blocks.length;
+    const completedBlocks = completionStatuses.filter(status =>
+      status.blockId && status.isCompleted
+    );
+
+    const percentage = totalBlocks > 0 ? (completedBlocks.length / totalBlocks) * 100 : 0;
+
+    return {
+      courseId,
+      totalBlocks,
+      completedBlocks,
+      percentage,
+      isCompleted: completionStatuses.some(status =>
+        (status.blockId === "" || status.blockId === null ) && (status.taskId === "" ||status.taskId ===  null) && status.isCompleted
+      ),
+    };
+  }
+
+  private async checkCourseCompletion(courseId: string, userId: string) {
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      include: {
+        blocks: true,
+      },
+    });
+
+    if (!course) return;
+    const blockCompletionStatuses = await prisma.completionStatus.findMany({
+      where: {
+        userId,
+        courseId,
+        blockId: { not: null },
+        isCompleted: true,
+      },
+    });
+
+    const allBlocksCompleted = course.blocks.every(block =>
+      blockCompletionStatuses.some(status => status.blockId === block.id)
+    );
+
+
+
+    if (allBlocksCompleted) {
+      const existingStatus = await prisma.completionStatus.findFirst({
+        where: {
+          userId,
+          courseId,
+          blockId: null,
+          taskId: null,
+        },
+      });
+
+      if (existingStatus) {
+        await prisma.completionStatus.update({
+          where: { id: existingStatus.id },
+          data: { isCompleted: true },
+        });
+      } else {
+        await prisma.completionStatus.create({
+          data: {
+            userId,
+            courseId,
+            blockId: null,
+            taskId: null,
+            isCompleted: true,
+          },
+        });
+      }
+      await prisma.certificate.create({
+        data: {
+          userId,
+          courseId,
+          pdfPath: '', // Путь к PDF будет добавлен позже
+        },
+      });
+
+      // Логика для достижений будет добавлена позже
+    }
   }
 }

@@ -88,7 +88,6 @@ router.use(protect);
  */
 router.get('/', courseController.getAll);
 
-// FIXME
 /**
  * @swagger
  * /api/courses:
@@ -141,7 +140,6 @@ router.post(
   restrictTo(['ADMIN'], ['AUTHOR']),
   upload.fields([
     { name: 'coverImage', maxCount: 1 },
-    // Поддерживаем до 10 блоков с теоретическими материалами
     ...Array.from({ length: 10 }, (_, i) => ({
       name: `theoreticalMaterial_${i}`,
       maxCount: 1,
@@ -180,5 +178,151 @@ router.delete(
   restrictTo(['ADMIN'], ['AUTHOR']),
   courseController.delete,
 );
+
+/**
+ * @swagger
+ * /api/courses/{id}/learn:
+ *   get:
+ *     summary: Получение курса для обучения
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID курса
+ *     responses:
+ *       200:
+ *         description: Курс для обучения
+ *       401:
+ *         description: Не авторизован
+ *       404:
+ *         description: Курс не найден
+ */
+router.get('/:id/learn', courseController.getCourseForLearning);
+
+/**
+ * @swagger
+ * /api/courses/{id}/start:
+ *   post:
+ *     summary: Начать прохождение курса
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID курса
+ *     responses:
+ *       201:
+ *         description: Курс начат
+ *       401:
+ *         description: Не авторизован
+ *       404:
+ *         description: Курс не найден
+ */
+router.post('/:id/start', courseController.startCourse);
+
+/**
+ * @swagger
+ * /api/courses/blocks/{blockId}/complete:
+ *   post:
+ *     summary: Отметить блок как завершенный
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: blockId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID блока
+ *     responses:
+ *       200:
+ *         description: Блок завершен
+ *       401:
+ *         description: Не авторизован
+ *       404:
+ *         description: Блок не найден
+ */
+router.post('/blocks/:blockId/complete', courseController.completeBlock);
+
+/**
+ * @swagger
+ * /api/courses/tests/{testId}/submit:
+ *   post:
+ *     summary: Отправить ответы на тест
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: testId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID теста
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - answers
+ *             properties:
+ *               answers:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - questionId
+ *                     - optionId
+ *                   properties:
+ *                     questionId:
+ *                       type: string
+ *                     optionId:
+ *                       type: string
+ *     responses:
+ *       200:
+ *         description: Результаты теста
+ *       401:
+ *         description: Не авторизован
+ *       404:
+ *         description: Тест не найден
+ */
+router.post('/tests/:testId/submit', courseController.submitTest);
+
+/**
+ * @swagger
+ * /api/courses/{id}/progress:
+ *   get:
+ *     summary: Получение прогресса по курсу
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID курса
+ *     responses:
+ *       200:
+ *         description: Прогресс по курсу
+ *       401:
+ *         description: Не авторизован
+ *       404:
+ *         description: Курс не найден
+ */
+router.get('/:id/progress', courseController.getCourseProgress);
 
 export const courseRouter = router;

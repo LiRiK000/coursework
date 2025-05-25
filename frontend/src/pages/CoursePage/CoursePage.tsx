@@ -140,7 +140,12 @@ export const CoursePage = () => {
                 </Card>
 
                 <Space direction="vertical" style={{ width: '100%' }}>
-                  <Button type="primary" block size="large">
+                  <Button 
+                    type="primary" 
+                    block 
+                    size="large"
+                    onClick={() => navigate(`/courses/${id}/learn`)}
+                  >
                     Начать обучение
                   </Button>
                   <Button

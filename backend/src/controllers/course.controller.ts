@@ -158,6 +158,87 @@ class CourseController {
       next(error);
     }
   };
+
+  getCourseForLearning = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        throw ApiError.Unauthorized();
+      }
+
+      const course = await this.courseService.getCourseForLearning(id, userId);
+      res.json({ course });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  startCourse = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        throw ApiError.Unauthorized();
+      }
+
+      await this.courseService.startCourse(id, userId);
+      res.status(201).json({ message: 'Курс начат' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  completeBlock = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { blockId } = req.params;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        throw ApiError.Unauthorized();
+      }
+
+      await this.courseService.completeBlock(blockId, userId);
+      res.json({ message: 'Блок завершен' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  submitTest = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { testId } = req.params;
+      const { answers } = req.body;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        throw ApiError.Unauthorized();
+      }
+
+      const result = await this.courseService.submitTest(testId, answers, userId);
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getCourseProgress = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+
+      if (!userId) {
+        throw ApiError.Unauthorized();
+      }
+
+      const progress = await this.courseService.getCourseProgress(id, userId);
+      res.json({ progress });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export const courseController = new CourseController();

@@ -1,10 +1,12 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FormData } from '../model/schema';
 import { courseAdapter } from '../utils/courseAdapter';
 import { message } from 'antd';
 import { courseService } from '@/shared/service/CourseService';
 
 export const useCreateCourse = () => {
+  const queryClient = useQueryClient();
+
   const mutation = useMutation({
     mutationFn: async (formData: FormData) => {
       const submissionData = courseAdapter(formData);
@@ -12,6 +14,7 @@ export const useCreateCourse = () => {
     },
     onSuccess: () => {
       message.success('Курс успешно создан');
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
     },
     onError: (error) => {
       message.error('Ошибка при создании курса');
