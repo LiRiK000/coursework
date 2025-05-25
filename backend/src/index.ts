@@ -6,7 +6,7 @@ import { progressRouter } from './routes/progress.routes';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { rateLimit } from 'express-rate-limit'
+import { rateLimit } from 'express-rate-limit';
 import { errorHandler } from './middleware/error.middleware';
 import express from 'express';
 import { courseRouter } from './routes/course.routes';
@@ -27,11 +27,11 @@ const corsOptions = {
 };
 // Rate limiting
 const limiter = rateLimit({
-	windowMs: 15 * 60 * 1000, // 15 minutes
-	limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
-	standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
-	legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
-})
+  windowMs: 1 * 60 * 1000, // 1 minute
+  limit: 100, // Limit each IP to 100 requests per `window` (here, per 1 minute).
+  standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+});
 
 // Middleware
 app.use(limiter);
@@ -59,5 +59,7 @@ app.use(errorHandler);
 
 app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}/api`);
-  console.log(`Swagger documentation available at http://localhost:${port}/api-docs`);
+  console.log(
+    `Swagger documentation available at http://localhost:${port}/api-docs`,
+  );
 });

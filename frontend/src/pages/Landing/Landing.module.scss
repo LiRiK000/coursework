@@ -1,8 +1,62 @@
+.layout {
+  min-height: 100vh;
+  background: var(--ant-layout-background);
+}
+
 .hero {
-  padding: 60px 40px;
-  min-height: 500px;
+  padding: 80px 40px;
+  min-height: 600px;
   display: flex;
   align-items: center;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(24, 144, 255, 0.1) 0%,
+      rgba(24, 144, 255, 0) 100%
+    );
+    z-index: 0;
+  }
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+}
+
+.heroTitle {
+  font-size: 3.5rem !important;
+  font-weight: 700 !important;
+  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1.5rem !important;
+}
+
+.heroDescription {
+  font-size: 1.25rem !important;
+  line-height: 1.6 !important;
+  color: var(--ant-text-color-secondary);
+}
+
+.ctaButton {
+  height: 48px;
+  padding: 0 32px;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  }
 }
 
 .heroImage {
@@ -10,5 +64,72 @@
   height: 400px;
   background: url('./img.png') no-repeat center right;
   background-size: contain;
-  border-radius: 10px;
+  border-radius: 16px;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+}
+
+.section {
+  padding: 80px 40px;
+  position: relative;
+}
+
+.sectionTitle {
+  text-align: center;
+  margin-bottom: 48px !important;
+  font-size: 2.5rem !important;
+  font-weight: 700 !important;
+}
+
+.featureCard {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 16px;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.featureIcon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+}
+
+.faqCollapse {
+  background: transparent;
+
+  :global {
+    .ant-collapse-item {
+      border-radius: 8px;
+      margin-bottom: 16px;
+      border: 1px solid var(--ant-border-color);
+      overflow: hidden;
+      transition: all 0.3s ease;
+
+      &:hover {
+        border-color: var(--ant-primary-color);
+      }
+    }
+
+    .ant-collapse-header {
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .ant-collapse-content {
+      border-top: 1px solid var(--ant-border-color);
+    }
+  }
+}
+
+.footer {
+  padding: 40px;
+  background: var(--ant-layout-footer-background);
+  border-top: 1px solid var(--ant-border-color);
 }

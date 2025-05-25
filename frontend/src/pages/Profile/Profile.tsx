@@ -38,6 +38,7 @@ export const Profile = () => {
           onClick={({ key }) => setSelectedKey(key)}
           className={classes.menu}
         />
+
         <SiderFooter
           role={role}
           userRequest={userRequest}

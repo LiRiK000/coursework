@@ -1,40 +1,67 @@
-import { AuthModalType, useAuthModal } from '@/features/Auth';
+import { AuthModalType, useAuth, useAuthModal } from '@/features/Auth';
 import { Menu } from '@/widgets/Menu';
-import { api } from '@/shared/api';
-import { Button, Typography, Layout, Space, Card, Row, Col } from 'antd';
+import {
+  Button,
+  Typography,
+  Layout,
+  Space,
+  Card,
+  Row,
+  Col,
+  Collapse,
+} from 'antd';
 import classes from './Landing.module.scss';
+import { faqItems, features } from './constants';
+import { useNavigate } from 'react-router-dom';
 
 const { Title, Paragraph, Text } = Typography;
-const { Content, Footer } = Layout;
+const { Content } = Layout;
+const { Panel } = Collapse;
 
 export const Landing = () => {
   const { openAuthModal } = useAuthModal();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
-  const handleClick = () => {
-    openAuthModal(AuthModalType.LOGIN);
+  const handleStartLearning = () => {
+    if (isAuthenticated) {
+      navigate('/main');
+    } else {
+      openAuthModal(AuthModalType.LOGIN);
+    }
   };
 
   return (
-    <Layout>
+    <Layout className={classes.layout}>
       <Menu />
       <Content>
         <Row
           justify="space-between"
           align="middle"
-          style={{ width: '100%' }}
           className={classes.hero}
           gutter={[32, 32]}
         >
           <Col xs={24} md={12}>
-            <Space direction="vertical" size="large">
-              <Title level={1}>Открой новые горизонты знаний</Title>
-              <Paragraph>
-                Skill Horizon — это онлайн-платформа для обучения и тестирования
-                знаний. Развивай навыки, проходи курсы и проверяй свои знания в
-                интерактивном формате.
+            <Space
+              direction="vertical"
+              size="large"
+              className={classes.heroContent}
+            >
+              <Title level={1} className={classes.heroTitle}>
+                Открой новые горизонты знаний
+              </Title>
+              <Paragraph className={classes.heroDescription}>
+                Skill Horizon — это инновационная платформа для обучения, где
+                каждый урок — это шаг к новым возможностям. Развивайте навыки,
+                которые действительно нужны в современном мире.
               </Paragraph>
-              <Button type="primary" size="large" onClick={handleClick}>
-                Начать обучение
+              <Button
+                type="primary"
+                size="large"
+                onClick={handleStartLearning}
+                className={classes.ctaButton}
+              >
+                {isAuthenticated ? 'На главную' : 'Начать обучение'}
               </Button>
             </Space>
           </Col>
@@ -43,40 +70,46 @@ export const Landing = () => {
           </Col>
         </Row>
 
-        <section id="features">
-          <Title level={2} style={{ textAlign: 'center' }}>
-            Особенности
+        <section id="features" className={classes.section}>
+          <Title level={2} className={classes.sectionTitle}>
+            Почему выбирают нас
           </Title>
           <Row gutter={[32, 32]} justify="center">
-            <Col xs={24} sm={8}>
-              <Card hoverable>
-                <Title level={3}>Интерактивное обучение</Title>
-                <Text>
-                  Практические задания и тесты для закрепления знаний.
-                </Text>
-              </Card>
-            </Col>
-            <Col xs={24} sm={8}>
-              <Card hoverable>
-                <Title level={3}>Адаптивные курсы</Title>
-                <Text>
-                  Программа, подстраивающаяся под ваш уровень подготовки.
-                </Text>
-              </Card>
-            </Col>
-            <Col xs={24} sm={8}>
-              <Card hoverable>
-                <Title level={3}>Система достижений</Title>
-                <Text>
-                  Получай баллы, сертификаты и делись успехами с друзьями.
-                </Text>
-              </Card>
+            {features.map((feature, index) => (
+              <Col xs={24} sm={8} key={index}>
+                <Card hoverable className={classes.featureCard}>
+                  <div className={classes.featureIcon}>{feature.icon}</div>
+                  <Title level={3}>{feature.title}</Title>
+                  <Text>{feature.description}</Text>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </section>
+
+        <section id="faq" className={classes.section}>
+          <Title level={2} className={classes.sectionTitle}>
+            Часто задаваемые вопросы
+          </Title>
+          <Row justify="center">
+            <Col xs={24} md={16}>
+              <Collapse
+                bordered={false}
+                className={classes.faqCollapse}
+                expandIconPosition="end"
+              >
+                {faqItems.map((item, index) => (
+                  <Panel header={item.question} key={index}>
+                    <Paragraph>{item.answer}</Paragraph>
+                  </Panel>
+                ))}
+              </Collapse>
             </Col>
           </Row>
         </section>
 
-        {/* Курсы */}
-        <section id="courses">
+        {/* PDF Generation Section (Commented) */}
+        {/* <section id="courses">
           <Title level={2} style={{ textAlign: 'center' }}>
             Популярные курсы
           </Title>
@@ -130,44 +163,8 @@ export const Landing = () => {
               ),
             )}
           </Row>
-        </section>
-
-        {/* Тестирование */}
-        <section id="test" style={{ textAlign: 'center' }}>
-          <Space direction="vertical" size="large">
-            <Title level={2}>Проверь свои знания</Title>
-            <Paragraph>
-              Пройди тест и получи мгновенную обратную связь по результатам.
-            </Paragraph>
-            <Button type="primary" size="large">
-              Пройти тест
-            </Button>
-          </Space>
-        </section>
+        </section> */}
       </Content>
-
-      {/* Footer */}
-      <Footer style={{ textAlign: 'center' }}>
-        <Space direction="vertical" size="small">
-          <Text>
-            &copy; {new Date().getFullYear()} Skill Horizon. Все права защищены.
-          </Text>
-          <Space split={<Text type="secondary">|</Text>}>
-            <Button type="link" href="#features">
-              Особенности
-            </Button>
-            <Button type="link" href="#courses">
-              Курсы
-            </Button>
-            <Button type="link" href="#test">
-              Тестирование
-            </Button>
-            <Button type="link" href="#contact">
-              Контакты
-            </Button>
-          </Space>
-        </Space>
-      </Footer>
     </Layout>
   );
 };

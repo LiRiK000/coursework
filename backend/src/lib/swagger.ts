@@ -6,9 +6,9 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'College Coursework API',
+      title: 'SkillHorizon API',
       version: '1.0.0',
-      description: 'API documentation for College Coursework project',
+      description: 'API documentation for SkillHorizon project',
     },
     servers: [
       {
@@ -29,7 +29,7 @@ const options: swaggerJsdoc.Options = {
       bearerAuth: [],
     }],
   },
-  apis: ['./src/routes/*.ts', './src/controllers/*.ts'], // Пути к файлам с JSDoc комментариями
+  apis: ['./src/routes/*.ts', './src/controllers/*.ts'],
 };
 
 const specs = swaggerJsdoc(options);
@@ -38,6 +38,6 @@ export const setupSwagger = (app: Express) => {
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
     explorer: true,
     customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: 'College Coursework API Documentation',
+    customSiteTitle: 'SkillHorizon API Documentation',
   }));
 };

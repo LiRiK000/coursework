@@ -2,17 +2,37 @@ import { courseService } from '@/shared/service/CourseService';
 import { CourseCard } from '@/shared/ui/CourseCard';
 import { Loader } from '@/shared/ui/Loader';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Typography, Space, Input, Row, Empty, message } from 'antd';
-import { useCallback } from 'react';
-
-const { Search } = Input;
+import { Typography, Space, Row, Empty, message } from 'antd';
+import { useCallback, useState } from 'react';
+import { SearchCourses } from '@/features/SearchCourses';
 
 export const AllCoursesTab = () => {
+  const [searchValue, setSearchValue] = useState('');
+  const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
+
   const queryClient = useQueryClient();
 
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchValue(e.target.value);
+    },
+    [],
+  );
+
+  const handleSearch = useCallback(() => {
+    const finalQuery = searchValue || undefined;
+    setSearchQuery(finalQuery);
+  }, [searchValue]);
+
+  const handleClearSearch = useCallback(() => {
+    setSearchValue('');
+    setSearchQuery(undefined);
+  }, []);
+
   const { data: courses = [], isLoading } = useQuery({
-    queryKey: ['courses'],
-    queryFn: courseService.getCourses,
+    queryKey: ['courses', searchQuery],
+    queryFn: () => courseService.getCourses(searchQuery),
+    enabled: true,
   });
 
   const { data: favoriteCourses = [] } = useQuery({
@@ -28,7 +48,7 @@ export const AllCoursesTab = () => {
         queryClient.invalidateQueries({ queryKey: ['courses'] });
       } catch (e) {
         message.error('Ошибка при удалении курса');
-        console.log(e);
+        console.error(e);
       }
     },
     [queryClient],
@@ -49,7 +69,7 @@ export const AllCoursesTab = () => {
         queryClient.invalidateQueries({ queryKey: ['favoriteCourses'] });
       } catch (e) {
         message.error('Ошибка при обновлении избранного');
-        console.log(e);
+        console.error(e);
       }
     },
     [favoriteCourses, queryClient],
@@ -61,33 +81,28 @@ export const AllCoursesTab = () => {
 
   return (
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
-      <Typography.Title level={2}>Доступные курсы</Typography.Title>
-      <Search
-        placeholder="Поиск курсов"
-        size="large"
-        disabled={!courses.length}
-        style={{ width: '100%', marginBottom: '24px' }}
+      <Typography.Title level={2}>Все курсы</Typography.Title>
+      <SearchCourses
+        disabled={isLoading}
+        value={searchValue}
+        onChange={handleInputChange}
+        onSearch={handleSearch}
+        onClear={handleClearSearch}
       />
-
-      {courses.length > 0 ? (
-        <Row gutter={[16, 16]} style={{ gap: '16px' }}>
+      {courses.length === 0 ? (
+        <Empty description="Курсы не найдены" />
+      ) : (
+        <Row gutter={[24, 24]}>
           {courses.map((course) => (
             <CourseCard
               key={course.id}
               course={course}
               onDelete={handleDeleteCourse}
               onToggleFavorite={handleToggleFavorite}
-              isFavorite={favoriteCourses.some(
-                (favCourse) => favCourse.id === course.id,
-              )}
+              isFavorite={favoriteCourses.some((c) => c.id === course.id)}
             />
           ))}
         </Row>
-      ) : (
-        <Empty
-          description="Курсы пока не добавлены"
-          style={{ margin: '40px 0' }}
-        />
       )}
     </Space>
   );

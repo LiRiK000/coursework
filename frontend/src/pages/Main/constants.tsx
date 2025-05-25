@@ -8,6 +8,7 @@ import {
 } from '@ant-design/icons';
 import { useUser } from '@/entities/User';
 import { FavoriteTab } from '@/widgets/FavoriteTab';
+import { MyCoursesTab } from '@/widgets/MyCoursesTab';
 
 export const useTabs = () => {
   const { role } = useUser();
@@ -46,6 +47,6 @@ export const useTabs = () => {
 export const TAB_COMPONENTS = {
   'all-courses': <AllCoursesTab />,
   favorites: <FavoriteTab />,
-  'my-courses': <></>,
+  'my-courses': <MyCoursesTab />,
   'create-course': <CreateCourseTab />,
 } as const;

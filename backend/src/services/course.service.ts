@@ -1,5 +1,6 @@
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../lib/ApiError';
+import { Prisma } from '@prisma/client';
 import {
   CreateCourseDto,
   UpdateCourseDto,
@@ -81,8 +82,18 @@ export class CourseService {
     });
   }
 
-  async getAllCourses() {
+  async getAllCourses(search?: string) {
+    const whereClause: Prisma.CourseWhereInput | undefined = search
+      ? {
+          title: {
+            contains: search,
+            mode: 'insensitive' as const,
+          },
+        }
+      : undefined;
+
     return prisma.course.findMany({
+      where: whereClause,
       include: {
         author: {
           select: {

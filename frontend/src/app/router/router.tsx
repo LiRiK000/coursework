@@ -8,6 +8,7 @@ import { Route, BrowserRouter, Routes } from 'react-router-dom';
 import { ProtectedWrapper } from '../providers/ProtectedWrapper';
 import { Suspense } from 'react';
 import { Loader } from '@/shared/ui/Loader';
+import { CoursePage } from '@/pages/CoursePage';
 
 export const CoreRouter = () => (
   <BrowserRouter>
@@ -26,6 +27,16 @@ export const CoreRouter = () => (
           <ProtectedWrapper>
             <Suspense fallback={<Loader fullscreen />}>
               <Main />
+            </Suspense>
+          </ProtectedWrapper>
+        }
+      />
+      <Route
+        path="/courses/:id"
+        element={
+          <ProtectedWrapper>
+            <Suspense fallback={<Loader fullscreen />}>
+              <CoursePage />
             </Suspense>
           </ProtectedWrapper>
         }

@@ -2,18 +2,21 @@ import { api } from '@/shared/api';
 import { Course, ICreateCourse } from './types';
 
 export class CourseService {
-  async getCourses(): Promise<Course[]> {
+  async getCourses(search?: string): Promise<Course[]> {
     const response = await api.get<{ total: number; courses: Course[] }>(
       '/courses',
+      {
+        params: {
+          search: search || undefined,
+        },
+      },
     );
     return response.data.courses;
   }
 
-  async getCourseById(id: string): Promise<Course> {
-    const response = await api.get<{ status: string; data: Course }>(
-      `/courses/${id}`,
-    );
-    return response.data.data;
+  async getCourseById(id: string): Promise<{ course: Course }> {
+    const response = await api.get<{ course: Course }>(`/courses/${id}`);
+    return response.data;
   }
 
   async createCourse(courseData: ICreateCourse): Promise<Course> {

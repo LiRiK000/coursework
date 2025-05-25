@@ -5,20 +5,18 @@ import {
   Button,
   Space,
   Tooltip,
-  message,
   Tag,
   Popconfirm,
 } from 'antd';
 import {
-  HeartOutlined,
-  HeartFilled,
   DeleteOutlined,
   UserOutlined,
+  StarOutlined,
+  StarFilled,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/Auth';
 import { Course } from '@/shared/service/CourseService/types';
-import { courseService } from '@/shared/service/CourseService';
 import { CoverPlaceholder } from './CoverPlaceholder';
 import styles from './CourseCard.module.scss';
 import { useUser } from '@/entities/User';
@@ -27,21 +25,20 @@ const { Title, Text } = Typography;
 
 interface CourseCardProps {
   course: Course;
-  onDelete?: (courseId: string) => void;
-  onToggleFavorite?: (courseId: string) => void;
-  isFavorite?: boolean;
+  isFavorite: boolean;
+  onToggleFavorite: (courseId: string) => Promise<void>;
+  onDelete?: (courseId: string) => Promise<void>;
 }
 
 export const CourseCard = ({
   course,
-  onDelete,
+  isFavorite,
   onToggleFavorite,
-  isFavorite = false,
+  onDelete,
 }: CourseCardProps) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const user = useUser();
-  const [isLoading, setIsLoading] = React.useState(false);
 
   const isAuthor = user?.id === course.authorId;
   const isAdmin = user?.role === 'ADMIN';
@@ -50,36 +47,15 @@ export const CourseCard = ({
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isAuthenticated) {
-      message.warning(
-        'Пожалуйста, войдите в систему, чтобы добавить курс в избранное',
-      );
       return;
     }
-
-    try {
-      setIsLoading(true);
-      onToggleFavorite?.(course.id);
-    } catch {
-      message.error('Произошла ошибка при обновлении избранного');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      await courseService.deleteCourse(course.id);
-      message.success('Курс успешно удален');
-      onDelete?.(course.id);
-    } catch {
-      message.error('Ошибка при удалении курса');
-    }
+    await onToggleFavorite(course.id);
   };
 
   return (
     <Card
       hoverable
-      className={styles.courseCard}
+      className={styles.card}
       style={{ maxWidth: '300px' }}
       cover={
         <div
@@ -103,20 +79,19 @@ export const CourseCard = ({
           type="text"
           icon={
             isFavorite ? (
-              <HeartFilled style={{ color: '#ff4d4f' }} />
+              <StarFilled style={{ color: 'yellow' }} />
             ) : (
-              <HeartOutlined />
+              <StarOutlined />
             )
           }
           onClick={handleFavoriteClick}
-          loading={isLoading}
         />,
-        canDelete && (
+        canDelete && onDelete && (
           <Popconfirm
             key="delete"
             title="Удалить курс?"
             description="Это действие нельзя будет отменить"
-            onConfirm={handleDelete}
+            onConfirm={() => onDelete(course.id)}
             okText="Да"
             cancelText="Нет"
           >

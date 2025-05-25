@@ -427,7 +427,7 @@ export const CreateCourse = () => {
       message.error(
         'Пожалуйста, заполните все обязательные поля и добавьте тесты ко всем блокам',
       );
-      console.log(errors);
+      console.error(errors);
       return;
     }
 
@@ -461,7 +461,7 @@ export const CreateCourse = () => {
       const errors = getStepErrors(currentStep);
       if (errors) {
         message.error('Пожалуйста, заполните все обязательные поля');
-        console.log(errors);
+        console.error(errors);
       }
       return;
     }

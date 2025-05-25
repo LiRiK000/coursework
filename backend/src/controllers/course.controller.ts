@@ -28,7 +28,8 @@ class CourseController {
 
   getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const courses = await this.courseService.getAllCourses();
+      const { search } = req.query;
+      const courses = await this.courseService.getAllCourses(search as string);
       res.json({ courses, total: courses.length });
     } catch (error) {
       next(error);
