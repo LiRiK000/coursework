@@ -3,7 +3,7 @@ import { courseService } from '@/shared/service/CourseService';
 
 export const useGetFavorites = () => {
   return useQuery({
-    queryKey: ['favorites'],
+    queryKey: ['favoriteCourses'],
     queryFn: () => courseService.getFavoriteCourses(),
   });
 };

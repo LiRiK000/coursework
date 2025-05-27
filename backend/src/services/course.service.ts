@@ -1,5 +1,6 @@
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../lib/ApiError';
+import { generateCertificate } from '../controllers/certificate.controller';
 import { Prisma } from '@prisma/client';
 import {
   CreateCourseDto,
@@ -347,7 +348,9 @@ export class CourseService {
       ...course,
       blocks: course.blocks.map((block) => ({
         ...block,
-        isCompleted: block.CompletionStatus.length > 0 && block.CompletionStatus[0].isCompleted,
+        isCompleted:
+          block.CompletionStatus.length > 0 &&
+          block.CompletionStatus[0].isCompleted,
         isAvailable: this.isBlockAvailable(block, course.blocks, userId),
         CompletionStatus: undefined,
       })),
@@ -355,14 +358,21 @@ export class CourseService {
     };
   }
 
-  private isBlockAvailable(currentBlock: any, allBlocks: any[], userId: string): boolean {
+  private isBlockAvailable(
+    currentBlock: any,
+    allBlocks: any[],
+    userId: string,
+  ): boolean {
     if (currentBlock.order === 0) return true;
 
-    const prevBlock = allBlocks.find(b => b.order === currentBlock.order - 1);
+    const prevBlock = allBlocks.find((b) => b.order === currentBlock.order - 1);
 
     if (!prevBlock) return true;
 
-    return prevBlock.CompletionStatus.length > 0 && prevBlock.CompletionStatus[0].isCompleted;
+    return (
+      prevBlock.CompletionStatus.length > 0 &&
+      prevBlock.CompletionStatus[0].isCompleted
+    );
   }
 
   async startCourse(courseId: string, userId: string) {
@@ -408,7 +418,9 @@ export class CourseService {
       });
 
       if (!testCompleted) {
-        throw ApiError.BadRequest('Необходимо пройти тест для завершения блока');
+        throw ApiError.BadRequest(
+          'Необходимо пройти тест для завершения блока',
+        );
       }
     }
 
@@ -443,7 +455,11 @@ export class CourseService {
     return { message: 'Блок завершен' };
   }
 
-  async submitTest(testId: string, answers: Array<{questionId: string, optionId: string}>, userId: string) {
+  async submitTest(
+    testId: string,
+    answers: Array<{ questionId: string; optionId: string }>,
+    userId: string,
+  ) {
     const test = await prisma.test.findUnique({
       where: { id: testId },
       include: {
@@ -465,10 +481,12 @@ export class CourseService {
     const results = [];
 
     for (const answer of answers) {
-      const question = test.questions.find(q => q.id === answer.questionId);
+      const question = test.questions.find((q) => q.id === answer.questionId);
       if (!question) continue;
 
-      const selectedOption = question.options.find(o => o.id === answer.optionId);
+      const selectedOption = question.options.find(
+        (o) => o.id === answer.optionId,
+      );
       if (!selectedOption) continue;
 
       const isCorrect = selectedOption.isCorrect;
@@ -477,7 +495,7 @@ export class CourseService {
       results.push({
         questionId: question.id,
         isCorrect,
-        correctOption: question.options.find(o => o.isCorrect)?.id,
+        correctOption: question.options.find((o) => o.isCorrect)?.id,
       });
     }
 
@@ -510,7 +528,6 @@ export class CourseService {
           },
         });
       }
-
 
       if (correctAnswers === totalQuestions) {
         // Логика для достижения будет добавлена позже
@@ -551,19 +568,23 @@ export class CourseService {
     });
 
     const totalBlocks = course.blocks.length;
-    const completedBlocks = completionStatuses.filter(status =>
-      status.blockId && status.isCompleted
+    const completedBlocks = completionStatuses.filter(
+      (status) => status.blockId && status.isCompleted,
     );
 
-    const percentage = totalBlocks > 0 ? (completedBlocks.length / totalBlocks) * 100 : 0;
+    const percentage =
+      totalBlocks > 0 ? (completedBlocks.length / totalBlocks) * 100 : 0;
 
     return {
       courseId,
       totalBlocks,
       completedBlocks,
       percentage,
-      isCompleted: completionStatuses.some(status =>
-        (status.blockId === "" || status.blockId === null ) && (status.taskId === "" ||status.taskId ===  null) && status.isCompleted
+      isCompleted: completionStatuses.some(
+        (status) =>
+          (status.blockId === '' || status.blockId === null) &&
+          (status.taskId === '' || status.taskId === null) &&
+          status.isCompleted,
       ),
     };
   }
@@ -586,11 +607,9 @@ export class CourseService {
       },
     });
 
-    const allBlocksCompleted = course.blocks.every(block =>
-      blockCompletionStatuses.some(status => status.blockId === block.id)
+    const allBlocksCompleted = course.blocks.every((block) =>
+      blockCompletionStatuses.some((status) => status.blockId === block.id),
     );
-
-
 
     if (allBlocksCompleted) {
       const existingStatus = await prisma.completionStatus.findFirst({
@@ -618,15 +637,17 @@ export class CourseService {
           },
         });
       }
-      await prisma.certificate.create({
-        data: {
-          userId,
-          courseId,
-          pdfPath: '', // Путь к PDF будет добавлен позже
-        },
-      });
 
-      // Логика для достижений будет добавлена позже
+      return {
+        isCompleted: true,
+        certificateUrl: `/api/certificates/${courseId}`,
+        message: 'Поздравляем! Вы успешно завершили курс!',
+      };
     }
+
+    return {
+      isCompleted: false,
+      message: 'Продолжайте обучение!',
+    };
   }
 }

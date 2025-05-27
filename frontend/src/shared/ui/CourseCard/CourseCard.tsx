@@ -20,6 +20,7 @@ import { Course } from '@/shared/service/CourseService/types';
 import { CoverPlaceholder } from './CoverPlaceholder';
 import styles from './CourseCard.module.scss';
 import { useUser } from '@/entities/User';
+import { levelMapper, categoryMapper } from '@/shared/utils';
 
 const { Title, Text } = Typography;
 
@@ -51,8 +52,6 @@ export const CourseCard = ({
     }
     await onToggleFavorite(course.id);
   };
-
-  console.log(course.coverImage);
 
   return (
     <Card
@@ -120,8 +119,8 @@ export const CourseCard = ({
               </Text>
             </Tooltip>
             <Space>
-              <Tag color="blue">{course.category}</Tag>
-              <Tag color="green">{course.level}</Tag>
+              <Tag color="blue">{categoryMapper(course.category)}</Tag>
+              <Tag color="green">{levelMapper(course.level)}</Tag>
             </Space>
           </Space>
         }

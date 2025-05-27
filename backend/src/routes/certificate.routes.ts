@@ -13,54 +13,52 @@ import { protect } from '../middleware/auth.middleware';
  * @swagger
  * components:
  *   schemas:
- *     CertificateRequest:
- *       type: object
- *       required:
- *         - courseId
- *       properties:
- *         courseId:
- *           type: string
- *           description: ID курса, для которого генерируется сертификат
  *     CertificateResponse:
  *       type: object
  *       properties:
- *         certificateUrl:
+ *         status:
  *           type: string
- *           description: URL для скачивания сертификата
- *         expiresAt:
- *           type: string
- *           format: date-time
- *           description: Дата истечения срока действия ссылки
+ *           description: Статус операции
+ *         data:
+ *           type: object
+ *           properties:
+ *             certificateUrl:
+ *               type: string
+ *               description: URL для скачивания сертификата
  */
 
-export const certificateRouter = Router();
+const router = Router();
 
 /**
  * @swagger
- * /api/certificates/generate:
- *   post:
- *     summary: Генерация сертификата о прохождении курса
+ * /api/certificates/{courseId}:
+ *   get:
+ *     summary: Получение сертификата о прохождении курса
  *     tags: [Certificates]
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/CertificateRequest'
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID курса
  *     responses:
  *       200:
  *         description: Сертификат успешно сгенерирован
  *         content:
- *           application/json:
+ *           application/pdf:
  *             schema:
- *               $ref: '#/components/schemas/CertificateResponse'
+ *               type: string
+ *               format: binary
  *       401:
  *         description: Не авторизован
- *       403:
- *         description: Курс не пройден
+ *       400:
+ *         description: Курс не завершен
  *       404:
  *         description: Курс не найден
  */
-certificateRouter.post('/generate', protect, generateCertificate);
+router.get('/:courseId', protect, generateCertificate);
+
+export default router;

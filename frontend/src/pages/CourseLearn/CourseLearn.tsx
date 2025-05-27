@@ -13,9 +13,13 @@ import {
   Divider,
   message,
 } from 'antd';
-import { HomeOutlined, ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import {
+  HomeOutlined,
+  ArrowLeftOutlined,
+  ArrowRightOutlined,
+} from '@ant-design/icons';
 import { TheoryBlock } from './components/TheoryBlock';
-import { TestBlock } from './components/TestBlock'
+import { TestBlock } from './components/TestBlock';
 import { isAxiosError } from 'axios';
 
 const { Title, Text } = Typography;
@@ -57,8 +61,9 @@ export const CourseLearn = () => {
 
   useEffect(() => {
     if (progressData && Array.isArray(progressData.completedBlocks)) {
-      const completed = progressData.completedBlocks.map(block => block.blockId);
-      console.log(completed)
+      const completed = progressData.completedBlocks.map(
+        (block) => block.blockId,
+      );
       setCompletedBlocks(completed);
     } else {
       setCompletedBlocks([]);
@@ -92,7 +97,9 @@ export const CourseLearn = () => {
   const course = data.course;
   const blocks = course.blocks;
   const currentBlock = blocks[currentBlockIndex];
-  const progress = progressData ? Math.round((completedBlocks?.length / blocks.length) * 100) : 0;
+  const progress = progressData
+    ? Math.round((completedBlocks?.length / blocks.length) * 100)
+    : 0;
 
   const handlePrevBlock = () => {
     if (currentBlockIndex > 0) {
@@ -121,19 +128,23 @@ export const CourseLearn = () => {
         setCurrentBlockIndex(currentBlockIndex + 1);
       }
     } catch (error) {
-      if(isAxiosError(error)) {
+      if (isAxiosError(error)) {
         message.error(error?.response?.data?.message);
-        return
+        return;
       }
       message.error('Ошибка при завершении блока');
       console.error(error);
     }
   };
 
-  const handleSubmitTest = async (answers: Array<{questionId: string, optionId: string}>) => {
+  const handleSubmitTest = async (
+    answers: Array<{ questionId: string; optionId: string }>,
+  ) => {
     if (testSubmitted) return;
     try {
-      const result = await courseService.submitTest(currentBlock.test.id, { answers });
+      const result = await courseService.submitTest(currentBlock.test.id, {
+        answers,
+      });
       if (result.isPassed) {
         setTestSubmitted(true);
         message.success(`Тест пройден! Ваш результат: ${result.score}%`);
@@ -145,10 +156,12 @@ export const CourseLearn = () => {
           setCurrentBlockIndex(currentBlockIndex + 1);
         }
       } else {
-        message.error(`Тест не пройден. Ваш результат: ${result.score}%. Необходимо набрать минимум ${currentBlock.test.passingScore}%`);
+        message.error(
+          `Тест не пройден. Ваш результат: ${result.score}%. Необходимо набрать минимум ${currentBlock.test.passingScore}%`,
+        );
       }
     } catch (error) {
-      if(isAxiosError(error)) {
+      if (isAxiosError(error)) {
         message.error(error?.response?.data?.message);
         return;
       }
@@ -172,7 +185,9 @@ export const CourseLearn = () => {
           <div>
             <Title level={2}>{course.title}</Title>
             <Progress percent={progress} status="active" />
-            <Text>Прогресс: {completedBlocks?.length} из {blocks.length} блоков</Text>
+            <Text>
+              Прогресс: {completedBlocks?.length} из {blocks.length} блоков
+            </Text>
           </div>
 
           <Divider />
@@ -200,12 +215,9 @@ export const CourseLearn = () => {
               Предыдущий блок
             </Button>
 
-              <Button
-                type="primary"
-                onClick={handleCompleteBlock}
-              >
-                Завершить блок
-              </Button>
+            <Button type="primary" onClick={handleCompleteBlock}>
+              Завершить блок
+            </Button>
 
             <Button
               icon={<ArrowRightOutlined />}

@@ -1,5 +1,4 @@
 import { authRouter } from './routes/auth.routes';
-import { certificateRouter } from './routes/certificate.routes';
 import { userRouter } from './routes/user.routes';
 import { sectionRouter } from './routes/section.routes';
 import { progressRouter } from './routes/progress.routes';
@@ -14,6 +13,7 @@ import { achievementRouter } from './routes/achievement.routes';
 import { authorshipRequestRouter } from './routes/authorshipRequest.routes';
 import { favoriteRouter } from './routes/favorite.routes';
 import { setupSwagger } from './lib/swagger';
+import certificateRoutes from './routes/certificate.routes';
 
 dotenv.config();
 
@@ -45,7 +45,7 @@ setupSwagger(app);
 
 // Routes
 app.use('/api/auth', authRouter);
-app.use('/api/certificates', certificateRouter);
+app.use('/api/certificates', certificateRoutes);
 app.use('/api/users', userRouter);
 app.use('/api/sections', sectionRouter);
 app.use('/api/courses', courseRouter);
