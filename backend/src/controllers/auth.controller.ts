@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { AppError } from '../middleware/error.middleware';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma';
 

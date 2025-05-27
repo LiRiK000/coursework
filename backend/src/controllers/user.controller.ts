@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { AppError } from '../middleware/error.middleware';
+import bcrypt from 'bcryptjs';
 import { prisma } from '../lib/prisma';
-import bcrypt from 'bcrypt';
 
 interface RequestWithUser extends Request {
   file?: Express.Multer.File;
