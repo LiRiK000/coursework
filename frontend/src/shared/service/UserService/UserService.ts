@@ -1,5 +1,5 @@
 import { api } from '@/shared/api';
-import { PasswordChangeDto, UserProfile, UserUpdateDto } from './types';
+import { GetAllUsersResponse, PasswordChangeDto, UserProfile, UserUpdateDto } from './types';
 import { ApiResponse } from '../types';
 
 export class UserService {
@@ -38,6 +38,11 @@ export class UserService {
   }
 
   async deleteAccount(): Promise<void> {
-    await api.delete('/api/users');
+    await api.delete('/users');
+  }
+
+  async getAllUsers(): Promise<GetAllUsersResponse['data']> {
+    const response = await api.get('/users');
+    return response.data.data.users;
   }
 }

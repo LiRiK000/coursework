@@ -4,6 +4,7 @@ import { UserProfile, userService } from '@/shared/service/UserService';
 import { useUser } from '@/entities/User';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { useState } from 'react';
+import { isAxiosError } from 'axios';
 
 export const useUpdateAvatar = () => {
   const { setUser, email, fullname, id, role } = useUser();
@@ -38,8 +39,12 @@ export const useUpdateAvatar = () => {
       message.success('Аватар успешно обновлен');
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
-    onError: () => {
-      message.error('Ошибка при загрузке аватара');
+    onError: (error) => {
+      message.error(
+        isAxiosError(error)
+          ? error?.response?.data.message || 'Ошибка при загрузке аватара'
+          : 'Ошибка при загрузке аватара',
+      );
     },
   });
 

@@ -4,6 +4,7 @@ import {
   updatePassword,
   getProfile,
   resetAvatar,
+  getAllUsers,
 } from '../controllers/user.controller';
 import { upload } from '../middleware/upload.middleware';
 import { protect } from '../middleware/auth.middleware';
@@ -51,6 +52,36 @@ import { protect } from '../middleware/auth.middleware';
 export const userRouter = Router();
 
 userRouter.use(protect);
+
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Получение списка всех пользователей
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Список пользователей
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     users:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Не авторизован
+ */
+userRouter.get('/', getAllUsers);
 
 /**
  * @swagger

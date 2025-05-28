@@ -22,3 +22,8 @@ export type PasswordChangeDto = {
   currentPassword: string;
   newPassword: string;
 };
+
+export type GetAllUsersResponse = {
+  status: string,
+  data: (UserProfile & {createdAt: string})[]
+}

@@ -230,3 +230,43 @@ export const updatePassword = async (
     next(error);
   }
 };
+
+export const getAllUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        fullname: true,
+        role: true,
+        avatar: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // Добавляем полный URL для аватаров
+    const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3001';
+    const usersWithFullAvatarUrl = users.map(user => ({
+      ...user,
+      avatar: user.avatar && !user.avatar.startsWith('http')
+        ? `${SERVER_URL}${user.avatar}`
+        : user.avatar,
+    }));
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        users: usersWithFullAvatarUrl,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -1,5 +1,6 @@
 import { Tabs } from 'antd';
 import { AuthorshipRequests } from '../AuthorshipRequests/AuthorshipRequests';
+import { AdminDashboard } from '../AdminDashboard/AdminDashboard';
 
 export const AdminTabs = () => {
   return (
@@ -9,7 +10,7 @@ export const AdminTabs = () => {
         {
           key: '1',
           label: 'Основное',
-          children: 'Основной контент',
+          children: <AdminDashboard />,
         },
         {
           key: '2',
