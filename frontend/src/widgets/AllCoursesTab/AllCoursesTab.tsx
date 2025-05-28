@@ -33,6 +33,7 @@ export const AllCoursesTab = () => {
     queryKey: ['courses', searchQuery],
     queryFn: () => courseService.getCourses(searchQuery),
     enabled: true,
+    refetchOnMount: true,
   });
 
   const { data: favoriteCourses = [] } = useQuery({

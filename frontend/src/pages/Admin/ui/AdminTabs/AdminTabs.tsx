@@ -6,6 +6,7 @@ export const AdminTabs = () => {
   return (
     <Tabs
       defaultActiveKey="1"
+      destroyInactiveTabPane={true}
       items={[
         {
           key: '1',

@@ -9,12 +9,12 @@ export const useCreateCourse = () => {
 
   const mutation = useMutation({
     mutationFn: async (formData: FormData) => {
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
       const submissionData = courseAdapter(formData);
       return courseService.createCourse(submissionData);
     },
     onSuccess: () => {
       message.success('Курс успешно создан');
-      queryClient.invalidateQueries({ queryKey: ['courses'] });
     },
     onError: (error) => {
       message.error('Ошибка при создании курса');
