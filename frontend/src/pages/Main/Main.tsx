@@ -23,7 +23,7 @@ export const Main = () => {
         />
       </Sider>
       <Content className={classes.content}>
-        <NavBar showMenuItems={false} />
+        <NavBar />
         <TabContentSwitcher selectedKey={selectedKey} />
       </Content>
     </Layout>

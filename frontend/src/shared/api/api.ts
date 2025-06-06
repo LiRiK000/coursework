@@ -6,6 +6,16 @@ interface CustomAxiosRequestConfig extends AxiosRequestConfig {
   retryCount?: number;
 }
 
+export class RateLimitError extends Error {
+  retryAfter: number;
+
+  constructor(retryAfter: number) {
+    super('Rate limit exceeded');
+    this.name = 'RateLimitError';
+    this.retryAfter = retryAfter;
+  }
+}
+
 const API_BASE_URL = 'http://localhost:3001/api';
 
 export const api = axios.create({
@@ -46,35 +56,44 @@ api.interceptors.response.use(
     const originalRequest = error.config! as CustomAxiosRequestConfig;
     const MAX_RETRY_ATTEMPTS = 1;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        // Если уже идет обновление токена, добавляем запрос в очередь
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then(() => {
-            return api(originalRequest);
+    // Обработка Rate Limit (429)
+    if (error.response?.status === 429) {
+      const retryAfter = error.response.headers['retry-after'];
+      const retryAfterSeconds = parseInt(retryAfter || '60', 10);
+      return Promise.reject(new RateLimitError(retryAfterSeconds));
+    }
+
+    // Обработка ошибок аутентификации
+    if (error.response?.status === 403) {
+      if (!originalRequest._retry) {
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
           })
-          .catch((err) => {
-            return Promise.reject(err);
-          });
-      }
+            .then(() => {
+              return api(originalRequest);
+            })
+            .catch((err) => {
+              return Promise.reject(err);
+            });
+        }
 
-      originalRequest._retry = true;
-      originalRequest.retryCount = (originalRequest.retryCount || 0) + 1;
+        originalRequest._retry = true;
+        originalRequest.retryCount = (originalRequest.retryCount || 0) + 1;
 
-      if (originalRequest.retryCount <= MAX_RETRY_ATTEMPTS) {
-        isRefreshing = true;
+        if (originalRequest.retryCount <= MAX_RETRY_ATTEMPTS) {
+          isRefreshing = true;
 
-        try {
-          await authService.checkAuth();
-          isRefreshing = false;
-          processQueue();
-          return api(originalRequest);
-        } catch (refreshError) {
-          isRefreshing = false;
-          processQueue(refreshError);
-          return Promise.reject(refreshError);
+          try {
+            await authService.checkAuth();
+            isRefreshing = false;
+            processQueue();
+            return api(originalRequest);
+          } catch (refreshError) {
+            isRefreshing = false;
+            processQueue(refreshError);
+            return Promise.reject(refreshError);
+          }
         }
       }
     }

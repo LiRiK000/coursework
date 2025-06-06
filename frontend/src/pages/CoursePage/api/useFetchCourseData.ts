@@ -6,12 +6,13 @@ export const useFetchCourseData = (id: string) => {
     queryKey: ['course', id],
     queryFn: () => courseService.getCourseById(id),
   });
-  const isFavorite = useQuery({
-    queryKey: ['isFavorite', id],
-    queryFn: async () => {
-      const data = await courseService.getFavoriteCourses();
-      return data.some((course) => course.id === id);
-    },
+
+  const { data: favoriteCourses = [] } = useQuery({
+    queryKey: ['favoriteCourses'],
+    queryFn: courseService.getFavoriteCourses,
   });
-  return { data, isLoading, error, isFavorite: !isFavorite.data };
+
+  const isFavorite = favoriteCourses.some((course) => course.id === id);
+
+  return { data, isLoading, error, isFavorite };
 };

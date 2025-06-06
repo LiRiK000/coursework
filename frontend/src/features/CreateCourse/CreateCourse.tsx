@@ -27,6 +27,8 @@ import MDEditor from '@uiw/react-md-editor';
 import { v4 as uuidv4 } from 'uuid';
 import type { RcFile } from 'antd/es/upload';
 import { CreateTestModal } from './ui/CreateTest';
+import { levelMapper } from '@/shared/utils/levelMapper';
+import { categoryMapper } from '@/shared/utils/categoryMapper';
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
@@ -61,24 +63,26 @@ export const CreateCourse = () => {
   const handleTestSave = (test: Test) => {
     if (selectedBlockId) {
       const newBlocks = formData.blocks?.map((block) =>
-        block.id === selectedBlockId ? { ...block, test } : block,
+        block.id === selectedBlockId ? { ...block, test: { ...test } } : block,
       );
       setFormData((prev) => ({ ...prev, blocks: newBlocks }));
     }
   };
+
+  const getEmptyTest = () => ({
+    id: uuidv4(),
+    title: '',
+    description: '',
+    questions: [],
+    passingScore: 70,
+  });
 
   const handleAddBlock = () => {
     const newBlock: Block = {
       id: uuidv4(),
       title: '',
       content: '',
-      test: {
-        id: uuidv4(),
-        title: '',
-        description: '',
-        questions: [],
-        passingScore: 70,
-      },
+      test: undefined,
     };
     setFormData((prev) => ({
       ...prev,
@@ -358,13 +362,8 @@ export const CreateCourse = () => {
             open={isTestModalOpen}
             onClose={handleTestModalClose}
             test={
-              formData.blocks?.find((b) => b.id === selectedBlockId)?.test || {
-                id: uuidv4(),
-                title: '',
-                description: '',
-                questions: [],
-                passingScore: 70,
-              }
+              formData.blocks?.find((b) => b.id === selectedBlockId)?.test ||
+              getEmptyTest()
             }
             onSave={handleTestSave}
           />
@@ -379,8 +378,12 @@ export const CreateCourse = () => {
             <div>
               <Title level={3}>{formData.step1?.title}</Title>
               <Space>
-                <Tag color="blue">{formData.step1?.category}</Tag>
-                <Tag color="green">{formData.step1?.level}</Tag>
+                <Tag color="blue">
+                  {categoryMapper(formData.step1?.category || '')}
+                </Tag>
+                <Tag color="green">
+                  {levelMapper(formData.step1?.level || '')}
+                </Tag>
               </Space>
             </div>
 

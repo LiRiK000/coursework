@@ -3,6 +3,7 @@ import { CreateCourseDto, CourseBlock } from '../types/course.types';
 import { ApiError } from '../lib/ApiError';
 import { CourseService } from '../services/course.service';
 import path from 'path';
+import { prisma } from '../lib/prisma';
 
 class CourseController {
   private courseService: CourseService;
@@ -159,7 +160,11 @@ class CourseController {
     }
   };
 
-  getCourseForLearning = async (req: Request, res: Response, next: NextFunction) => {
+  getCourseForLearning = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
     try {
       const { id } = req.params;
       const userId = req.user?.id;
@@ -200,8 +205,27 @@ class CourseController {
         throw ApiError.Unauthorized();
       }
 
-      await this.courseService.completeBlock(blockId, userId);
-      res.json({ message: 'Блок завершен' });
+      const result = await this.courseService.completeBlock(blockId, userId);
+
+      if (result.courseCompleted) {
+        const block = await prisma.block.findUnique({
+          where: { id: blockId },
+          select: { courseId: true },
+        });
+
+        if (!block) {
+          throw ApiError.NotFound('Блок не найден');
+        }
+
+        res.json({
+          message: result.message,
+          courseCompleted: true,
+          redirectTo: `/courses/${block.courseId}/congratulations`,
+        });
+        return;
+      }
+
+      res.json(result);
     } catch (error) {
       next(error);
     }
@@ -217,14 +241,22 @@ class CourseController {
         throw ApiError.Unauthorized();
       }
 
-      const result = await this.courseService.submitTest(testId, answers, userId);
+      const result = await this.courseService.submitTest(
+        testId,
+        answers,
+        userId,
+      );
       res.json(result);
     } catch (error) {
       next(error);
     }
   };
 
-  getCourseProgress = async (req: Request, res: Response, next: NextFunction) => {
+  getCourseProgress = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
     try {
       const { id } = req.params;
       const userId = req.user?.id;
@@ -235,6 +267,25 @@ class CourseController {
 
       const progress = await this.courseService.getCourseProgress(id, userId);
       res.json({ progress });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getCompletedCourses = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        throw ApiError.Unauthorized();
+      }
+
+      const courses = await this.courseService.getCompletedCourses(userId);
+      res.json({ courses, total: courses.length });
     } catch (error) {
       next(error);
     }

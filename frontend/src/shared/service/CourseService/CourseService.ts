@@ -1,5 +1,5 @@
 import { api } from '@/shared/api';
-import { Course } from './types';
+import { Course, DownloadCertificateDTO } from './types';
 
 export class CourseService {
   async getCourses(search?: string): Promise<Course[]> {
@@ -10,6 +10,13 @@ export class CourseService {
           search: search || undefined,
         },
       },
+    );
+    return response.data.courses;
+  }
+
+  async getCompletedCourses(): Promise<Course[]> {
+    const response = await api.get<{ courses: Course[]; total: number }>(
+      '/courses/completed',
     );
     return response.data.courses;
   }
@@ -72,22 +79,53 @@ export class CourseService {
     await api.post(`/courses/${id}/start`);
   }
 
-  async completeBlock(blockId: string): Promise<void> {
-    await api.post(`/courses/blocks/${blockId}/complete`);
+  async completeBlock(blockId: string) {
+    const response = await api.post<{
+      message: string;
+      courseCompleted?: boolean;
+      redirectTo?: string;
+    }>(`/courses/blocks/${blockId}/complete`);
+    return response.data;
   }
 
-  async submitTest(testId: string, data: { answers: Array<{questionId: string, optionId: string}> }): Promise<{ isPassed: boolean; score: number }> {
+  async submitTest(
+    testId: string,
+    data: { answers: Array<{ questionId: string; optionId: string }> },
+  ): Promise<{ isPassed: boolean; score: number }> {
     const response = await api.post<{ isPassed: boolean; score: number }>(
       `/courses/tests/${testId}/submit`,
-      data
+      data,
     );
     return response.data;
   }
 
-  async getCourseProgress(id: string): Promise<{ completedBlocks: { blockId: string }[]; isCompleted: boolean }> {
-    const response = await api.get<{progress: { completedBlocks: { blockId: string }[]; isCompleted: boolean }}>(
-      `/courses/${id}/progress`
-    );
+  async getCourseProgress(
+    id: string,
+  ): Promise<{ completedBlocks: { blockId: string }[]; isCompleted: boolean }> {
+    const response = await api.get<{
+      progress: {
+        completedBlocks: { blockId: string }[];
+        isCompleted: boolean;
+      };
+    }>(`/courses/${id}/progress`);
     return response.data.progress;
+  }
+
+  async downloadCertificate({
+    email,
+    courseName,
+    courseId,
+  }: DownloadCertificateDTO): Promise<Blob> {
+    const response = await api.post(
+      `/certificates/${courseId}`,
+      {
+        email,
+        courseName,
+      },
+      {
+        responseType: 'blob',
+      },
+    );
+    return response.data;
   }
 }

@@ -107,63 +107,6 @@ export const Landing = () => {
             </Col>
           </Row>
         </section>
-
-        {/* PDF Generation Section (Commented) */}
-        {/* <section id="courses">
-          <Title level={2} style={{ textAlign: 'center' }}>
-            Популярные курсы
-          </Title>
-          <Row gutter={[32, 32]} justify="center">
-            {['Основы программирования', 'Веб-разработка', 'Анализ данных'].map(
-              (course) => (
-                <Col xs={24} sm={8} key={course}>
-                  <Card
-                    hoverable
-                    actions={[
-                      <Button
-                        type="primary"
-                        onClick={async () => {
-                          try {
-                            const response = await api.post(
-                              '/certificates/generate',
-                              {
-                                email: 'test@example.com',
-                                courseName: course,
-                              },
-                              {
-                                responseType: 'blob',
-                                withCredentials: true,
-                              },
-                            );
-
-                            const url = window.URL.createObjectURL(
-                              new Blob([response.data]),
-                            );
-                            const link = document.createElement('a');
-                            link.href = url;
-                            link.setAttribute('download', 'certificate.pdf');
-                            document.body.appendChild(link);
-                            link.click();
-                            link.remove();
-                          } catch (error) {
-                            console.error(
-                              'Ошибка при получении сертификата:',
-                              error,
-                            );
-                          }
-                        }}
-                      >
-                        Получить сертификат
-                      </Button>,
-                    ]}
-                  >
-                    <Card.Meta title={course} />
-                  </Card>
-                </Col>
-              ),
-            )}
-          </Row>
-        </section> */}
       </Content>
     </Layout>
   );

@@ -13,8 +13,8 @@ export const TabContentSwitcher = ({
       return TAB_COMPONENTS.profile;
     case 'achievements':
       return TAB_COMPONENTS.achievements;
-    case 'settings':
-      return TAB_COMPONENTS.settings;
+    case 'completed-courses':
+      return TAB_COMPONENTS.completedCourses;
     case 'security':
       return TAB_COMPONENTS.security;
     default:

@@ -26,9 +26,10 @@ const { Title, Text } = Typography;
 
 interface CourseCardProps {
   course: Course;
-  isFavorite: boolean;
-  onToggleFavorite: (courseId: string) => Promise<void>;
+  isFavorite?: boolean;
+  onToggleFavorite?: (courseId: string) => Promise<void>;
   onDelete?: (courseId: string) => Promise<void>;
+  customActions?: React.ReactNode[];
 }
 
 export const CourseCard = ({
@@ -36,6 +37,7 @@ export const CourseCard = ({
   isFavorite,
   onToggleFavorite,
   onDelete,
+  customActions,
 }: CourseCardProps) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
@@ -50,8 +52,37 @@ export const CourseCard = ({
     if (!isAuthenticated) {
       return;
     }
-    await onToggleFavorite(course.id);
+    await onToggleFavorite?.(course.id);
   };
+
+  const cardActions =
+    customActions ||
+    [
+      <Button
+        key="favorite"
+        type="text"
+        icon={
+          isFavorite ? (
+            <StarFilled style={{ color: 'yellow' }} />
+          ) : (
+            <StarOutlined />
+          )
+        }
+        onClick={handleFavoriteClick}
+      />,
+      canDelete && onDelete && (
+        <Popconfirm
+          key="delete"
+          title="Удалить курс?"
+          description="Это действие нельзя будет отменить"
+          onConfirm={() => onDelete(course.id)}
+          okText="Да"
+          cancelText="Нет"
+        >
+          <Button type="text" danger icon={<DeleteOutlined />} />
+        </Popconfirm>
+      ),
+    ].filter(Boolean);
 
   return (
     <Card
@@ -74,32 +105,7 @@ export const CourseCard = ({
           )}
         </div>
       }
-      actions={[
-        <Button
-          key="favorite"
-          type="text"
-          icon={
-            isFavorite ? (
-              <StarFilled style={{ color: 'yellow' }} />
-            ) : (
-              <StarOutlined />
-            )
-          }
-          onClick={handleFavoriteClick}
-        />,
-        canDelete && onDelete && (
-          <Popconfirm
-            key="delete"
-            title="Удалить курс?"
-            description="Это действие нельзя будет отменить"
-            onConfirm={() => onDelete(course.id)}
-            okText="Да"
-            cancelText="Нет"
-          >
-            <Button type="text" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        ),
-      ].filter(Boolean)}
+      actions={cardActions}
     >
       <Card.Meta
         title={

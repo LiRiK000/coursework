@@ -10,6 +10,7 @@ import { Suspense } from 'react';
 import { Loader } from '@/shared/ui/Loader';
 import { CoursePage } from '@/pages/CoursePage';
 import { CourseLearn } from '@/pages/CourseLearn';
+import { CourseCongratulations } from '@/pages/CourseCongratulations';
 
 export const CoreRouter = () => (
   <BrowserRouter>
@@ -48,6 +49,16 @@ export const CoreRouter = () => (
           <ProtectedWrapper>
             <Suspense fallback={<Loader fullscreen />}>
               <CourseLearn />
+            </Suspense>
+          </ProtectedWrapper>
+        }
+      />
+      <Route
+        path="/courses/:id/congratulations"
+        element={
+          <ProtectedWrapper>
+            <Suspense fallback={<Loader fullscreen />}>
+              <CourseCongratulations />
             </Suspense>
           </ProtectedWrapper>
         }

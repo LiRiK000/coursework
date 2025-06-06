@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Button,
   Card,
@@ -40,6 +40,11 @@ export const CreateTestModal = ({
 }: CreateTestModalProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [localTest, setLocalTest] = useState<Test>(test);
+
+  useEffect(() => {
+    setLocalTest(test);
+    setCurrentStep(0);
+  }, [test, open]);
 
   const handleQuestionChange = (
     questionId: string,

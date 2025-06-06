@@ -72,3 +72,8 @@ export interface ICreateCourse {
   coverImage?: string;
   blocks: Block[];
 }
+export interface DownloadCertificateDTO {
+  email: string;
+  courseName: string;
+  courseId: string;
+}

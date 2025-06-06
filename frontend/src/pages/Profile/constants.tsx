@@ -1,6 +1,6 @@
 import { ProfileInfoTab } from '@/widgets/ProfileInfoTab';
 import { SecurityTab } from '@/widgets/SecurityTab';
-import { SettingsTab } from '@/widgets/SettingsTab';
+import { CompletedCoursesTab } from '@/widgets/CompletedCoursesTab';
 import {
   UserOutlined,
   SettingOutlined,
@@ -21,9 +21,9 @@ export const tabs = [
     label: 'Достижения',
   },
   {
-    key: 'settings',
+    key: 'completed-courses',
     icon: <SettingOutlined />,
-    label: 'Настройки',
+    label: 'Пройденные курсы',
   },
   {
     key: 'security',
@@ -35,6 +35,6 @@ export const tabs = [
 export const TAB_COMPONENTS = {
   profile: <ProfileInfoTab />,
   achievements: <AchievementsTab />,
-  settings: <SettingsTab />,
+  completedCourses: <CompletedCoursesTab />,
   security: <SecurityTab />,
 } as const;

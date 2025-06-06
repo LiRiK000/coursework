@@ -59,6 +59,6 @@ const router = Router();
  *       404:
  *         description: Курс не найден
  */
-router.get('/:courseId', protect, generateCertificate);
+router.post('/:courseId', protect, generateCertificate);
 
 export default router;

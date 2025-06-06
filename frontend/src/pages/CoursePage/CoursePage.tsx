@@ -21,6 +21,9 @@ import {
 import { Loader } from '@/shared/ui/Loader';
 import { courseService } from '@/shared/service/CourseService';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { levelMapper } from '@/shared/utils/levelMapper';
+import { categoryMapper } from '@/shared/utils/categoryMapper';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -28,11 +31,12 @@ export const CoursePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data, isLoading, error, isFavorite } = useFetchCourseData(id!);
-
+  const queryClient = useQueryClient();
   const [isFavoritedCourse, setIsFavoritedCourse] = useState(isFavorite);
 
   const handleFavoriteToggle = async () => {
     await courseService.toggleFavorite(id!);
+    queryClient.invalidateQueries({ queryKey: ['favoriteCourses'] });
     setIsFavoritedCourse(!isFavoritedCourse);
   };
 
@@ -76,8 +80,10 @@ export const CoursePage = () => {
               <Tag color="blue" icon={<BookOutlined />}>
                 Автор: {course.author.fullname}
               </Tag>
-              <Tag color="green">Уровень: {course.level}</Tag>
-              <Tag color="purple">Категория: {course.category}</Tag>
+              <Tag color="green">Уровень: {levelMapper(course.level)}</Tag>
+              <Tag color="purple">
+                Категория: {categoryMapper(course.category)}
+              </Tag>
             </Space>
             <Paragraph style={{ marginTop: 16 }}>
               {course.description}
@@ -140,9 +146,9 @@ export const CoursePage = () => {
                 </Card>
 
                 <Space direction="vertical" style={{ width: '100%' }}>
-                  <Button 
-                    type="primary" 
-                    block 
+                  <Button
+                    type="primary"
+                    block
                     size="large"
                     onClick={() => navigate(`/courses/${id}/learn`)}
                   >

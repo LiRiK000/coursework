@@ -10,8 +10,7 @@ const { Text } = Typography;
 
 export const AuthModal = () => {
   const { isOpen, closeAuthModal, ModalType, openAuthModal } = useAuthModal();
-  const { mutationSuccess, isLoading, login, register, isError } =
-    useAuthQuery();
+  const { mutationSuccess, isLoading, login, register } = useAuthQuery();
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [userFormData, setUserFormData] = useState<Partial<AuthFormData>>({});
@@ -56,13 +55,6 @@ export const AuthModal = () => {
         : AuthModalType.LOGIN,
     );
   };
-
-  if (isError) {
-    notification.error({
-      message: 'Ошибка',
-      description: 'Не удалось авторизоваться',
-    });
-  }
 
   if (isSubmitted && mutationSuccess) {
     notification.success({

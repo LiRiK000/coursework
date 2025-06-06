@@ -39,6 +39,7 @@ export const AllCoursesTab = () => {
   const { data: favoriteCourses = [] } = useQuery({
     queryKey: ['favoriteCourses'],
     queryFn: courseService.getFavoriteCourses,
+    refetchOnMount: true,
   });
 
   const handleDeleteCourse = useCallback(

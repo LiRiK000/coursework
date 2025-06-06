@@ -31,7 +31,9 @@ export const CourseLearn = () => {
 
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
   const [completedBlocks, setCompletedBlocks] = useState<string[]>([]);
-  const [testSubmitted, setTestSubmitted] = useState(false);
+  const [failedTestAttempts, setFailedTestAttempts] = useState<
+    Record<string, boolean>
+  >({});
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['course-learn', id],
@@ -65,10 +67,18 @@ export const CourseLearn = () => {
         (block) => block.blockId,
       );
       setCompletedBlocks(completed);
+
+      if (progressData.isCompleted) {
+        navigate(`/courses/${id}/congratulations`);
+      }
     } else {
       setCompletedBlocks([]);
     }
-  }, [progressData]);
+  }, [progressData, data?.course.blocks?.length, id, navigate]);
+
+  useEffect(() => {
+    setFailedTestAttempts({});
+  }, [currentBlockIndex]);
 
   if (isLoading || isProgressLoading) return <Loader fullscreen />;
 
@@ -115,8 +125,13 @@ export const CourseLearn = () => {
 
   const handleCompleteBlock = async () => {
     try {
-      await courseService.completeBlock(currentBlock.id);
-      message.success('Блок успешно завершен');
+      const result = await courseService.completeBlock(currentBlock.id);
+      message.success(result.message);
+
+      if (result.courseCompleted) {
+        navigate(result.redirectTo || '/main');
+        return;
+      }
 
       queryClient.invalidateQueries({ queryKey: ['course-progress', id] });
 
@@ -140,32 +155,44 @@ export const CourseLearn = () => {
   const handleSubmitTest = async (
     answers: Array<{ questionId: string; optionId: string }>,
   ) => {
-    if (testSubmitted) return;
+    const blockId = currentBlock.id;
+    if (completedBlocks?.includes(blockId)) return;
+
     try {
       const result = await courseService.submitTest(currentBlock.test.id, {
         answers,
       });
+
       if (result.isPassed) {
-        setTestSubmitted(true);
         message.success(`Тест пройден! Ваш результат: ${result.score}%`);
-        queryClient.invalidateQueries({ queryKey: ['course-progress', id] });
-        if (!completedBlocks?.includes(currentBlock.id)) {
-          setCompletedBlocks([...completedBlocks, currentBlock.id]);
+
+        if (!completedBlocks?.includes(blockId)) {
+          setCompletedBlocks((prev) => [...prev, blockId]);
         }
+
         if (currentBlockIndex < blocks.length - 1) {
-          setCurrentBlockIndex(currentBlockIndex + 1);
+          setCurrentBlockIndex((prev) => prev + 1);
         }
+
+        await queryClient.invalidateQueries({
+          queryKey: ['course-progress', id],
+        });
+
+        setFailedTestAttempts((prev) => ({ ...prev, [blockId]: false }));
       } else {
         message.error(
           `Тест не пройден. Ваш результат: ${result.score}%. Необходимо набрать минимум ${currentBlock.test.passingScore}%`,
         );
+        setFailedTestAttempts((prev) => ({ ...prev, [blockId]: true }));
       }
     } catch (error) {
       if (isAxiosError(error)) {
         message.error(error?.response?.data?.message);
+        setFailedTestAttempts((prev) => ({ ...prev, [blockId]: true }));
         return;
       }
       console.error(error);
+      setFailedTestAttempts((prev) => ({ ...prev, [blockId]: true }));
     }
   };
 
@@ -202,6 +229,7 @@ export const CourseLearn = () => {
                 test={currentBlock.test}
                 onSubmit={handleSubmitTest}
                 isCompleted={completedBlocks?.includes(currentBlock.id)}
+                hasFailedAttempt={failedTestAttempts[currentBlock.id] || false}
               />
             )}
           </Card>

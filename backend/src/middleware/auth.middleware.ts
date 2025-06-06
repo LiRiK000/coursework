@@ -28,7 +28,7 @@ export const protect = async (
     const refreshToken = req.cookies.refreshToken;
 
     if (!accessToken && !refreshToken) {
-      throw new AppError('Не предоставлены токены авторизации', 401);
+      return next(new AppError('Не предоставлены токены авторизации', 403));
     }
 
     try {
@@ -44,7 +44,7 @@ export const protect = async (
       });
 
       if (!user) {
-        throw new AppError('Пользователь не найден', 401);
+        return next(new AppError('Пользователь не найден', 401));
       }
 
       // Добавляем пользователя в объект запроса
@@ -57,7 +57,7 @@ export const protect = async (
         error instanceof jwt.JsonWebTokenError
       ) {
         if (!refreshToken) {
-          throw new AppError('Не предоставлен refresh token', 401);
+          return next(new AppError('Не предоставлен refresh token', 403));
         }
 
         try {
@@ -73,7 +73,7 @@ export const protect = async (
           });
 
           if (!user || user.refreshToken !== refreshToken) {
-            throw new AppError('Недействительный refresh token', 401);
+            return next(new AppError('Недействительный refresh token', 403));
           }
 
           // Генерируем новые токены
@@ -117,14 +117,14 @@ export const protect = async (
           req.user = user;
           next();
         } catch (refreshError) {
-          throw new AppError('Недействительный refresh token', 401);
+          return next(new AppError('Недействительный refresh token', 403));
         }
       } else {
-        throw error;
+        return next(error);
       }
     }
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -132,7 +132,6 @@ export const restrictTo = (...allowedRoles: string[][]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const userRole = req.user?.role || '';
 
-    // Проверяем, есть ли у пользователя хотя бы одна из разрешенных ролей
     const hasAccess = allowedRoles.some((roles) =>
       roles.some((role) => role === userRole),
     );

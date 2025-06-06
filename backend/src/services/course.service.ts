@@ -1,13 +1,12 @@
 import { prisma } from '../lib/prisma';
 import { ApiError } from '../lib/ApiError';
-import { generateCertificate } from '../controllers/certificate.controller';
 import { Prisma } from '@prisma/client';
 import {
   CreateCourseDto,
   CourseWithDetails,
   CourseBlock,
 } from '../types/course.types';
-import { randomUUID } from 'crypto';
+import { achievementService } from './achievement.service';
 
 export class CourseService {
   async createCourse(courseData: CreateCourseDto, authorId: string) {
@@ -450,9 +449,15 @@ export class CourseService {
       });
     }
 
-    await this.checkCourseCompletion(block.courseId, userId);
+    const completionResult = await this.checkCourseCompletion(
+      block.courseId,
+      userId,
+    );
 
-    return { message: 'Блок завершен' };
+    return {
+      message: 'Блок завершен',
+      courseCompleted: completionResult?.isCompleted || false,
+    };
   }
 
   async submitTest(
@@ -530,7 +535,7 @@ export class CourseService {
       }
 
       if (correctAnswers === totalQuestions) {
-        // Логика для достижения будет добавлена позже
+        await achievementService.awardAchievement(userId, 'COURSE_COMPLETION');
       }
     }
 
@@ -597,7 +602,8 @@ export class CourseService {
       },
     });
 
-    if (!course) return;
+    if (!course) return null;
+
     const blockCompletionStatuses = await prisma.completionStatus.findMany({
       where: {
         userId,
@@ -612,7 +618,7 @@ export class CourseService {
     );
 
     if (allBlocksCompleted) {
-      const existingStatus = await prisma.completionStatus.findFirst({
+      await prisma.completionStatus.deleteMany({
         where: {
           userId,
           courseId,
@@ -621,22 +627,15 @@ export class CourseService {
         },
       });
 
-      if (existingStatus) {
-        await prisma.completionStatus.update({
-          where: { id: existingStatus.id },
-          data: { isCompleted: true },
-        });
-      } else {
-        await prisma.completionStatus.create({
-          data: {
-            userId,
-            courseId,
-            blockId: null,
-            taskId: null,
-            isCompleted: true,
-          },
-        });
-      }
+      await prisma.completionStatus.create({
+        data: {
+          userId,
+          courseId,
+          blockId: null,
+          taskId: null,
+          isCompleted: true,
+        },
+      });
 
       return {
         isCompleted: true,
@@ -650,4 +649,40 @@ export class CourseService {
       message: 'Продолжайте обучение!',
     };
   }
+
+  async getCompletedCourses(userId: string) {
+    try {
+      const completedCourses = await prisma.course.findMany({
+        where: {
+          CompletionStatus: {
+            some: {
+              userId,
+              blockId: null,
+              taskId: null,
+              isCompleted: true,
+            },
+          },
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              email: true,
+              fullname: true,
+            },
+          },
+        },
+        orderBy: {
+          updatedAt: 'desc',
+        },
+      });
+
+      return completedCourses;
+    } catch (error) {
+      console.error('Error in getCompletedCourses:', error);
+      throw ApiError.Internal('Ошибка при получении списка завершенных курсов');
+    }
+  }
 }
+
+export const courseService = new CourseService();

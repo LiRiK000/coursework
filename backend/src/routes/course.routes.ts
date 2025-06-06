@@ -90,6 +90,22 @@ router.get('/', courseController.getAll);
 
 /**
  * @swagger
+ * /api/courses/completed:
+ *   get:
+ *     summary: Получение списка завершенных курсов
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Список завершенных курсов
+ *       401:
+ *         description: Не авторизован
+ */
+router.get('/completed', courseController.getCompletedCourses);
+
+/**
+ * @swagger
  * /api/courses:
  *   get:
  *     summary: Получение инфо по курсу

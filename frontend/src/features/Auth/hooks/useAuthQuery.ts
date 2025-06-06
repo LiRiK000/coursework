@@ -1,64 +1,53 @@
 import { useMutation } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
 import { useAuth } from './useAuth';
 import { notification } from 'antd';
-import { AuthFormData } from '../model/types';
-
-interface ErrorResponse {
-  message: string;
-}
+import { isAxiosError } from 'axios';
 
 export const useAuthQuery = () => {
   const { login, register } = useAuth();
 
   const loginMutation = useMutation({
     mutationFn: login,
-    onError: (error: AxiosError<ErrorResponse>) => {
+    retry: 0,
+    onError: (error: unknown) => {
+      let message = 'Login failed';
+
+      if (isAxiosError(error)) {
+        message = error.response?.data?.message || error.message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
       notification.error({
         message: 'Ошибка авторизации',
-        description:
-          error.response?.data?.message ||
-          error.message ||
-          'Не удалось войти в систему',
+        description: message,
       });
     },
   });
 
   const registerMutation = useMutation({
     mutationFn: register,
-    onError: (error: AxiosError<ErrorResponse>) => {
+    retry: 0,
+    onError: (error: unknown) => {
+      let message = 'Registration failed';
+
+      if (isAxiosError(error)) {
+        message = error.response?.data?.message || error.message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
       notification.error({
         message: 'Ошибка регистрации',
-        description:
-          error.response?.data?.message ||
-          error.message ||
-          'Не удалось зарегистрироваться',
+        description: message,
       });
     },
   });
 
-  const handleLogin = (data: AuthFormData) => {
-    loginMutation.mutate(data, {
-      onError: () => {
-        return false;
-      },
-    });
-  };
-
-  const handleRegister = (data: AuthFormData) => {
-    registerMutation.mutate(data, {
-      onError: () => {
-        return false;
-      },
-    });
-  };
-
   return {
-    login: handleLogin,
-    register: handleRegister,
-    mutationSuccess: loginMutation.isSuccess || registerMutation.isSuccess,
+    login: loginMutation.mutateAsync,
+    register: registerMutation.mutateAsync,
+    mutationSuccess: registerMutation.isSuccess || loginMutation.isSuccess,
     isLoading: loginMutation.isPending && registerMutation.isPending,
-    mutationError: loginMutation.error || registerMutation.error,
-    isError: loginMutation.isError || registerMutation.isError,
   };
 };
