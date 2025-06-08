@@ -1,0 +1,1 @@
+export { FavoriteTab } from './FavoriteTab';

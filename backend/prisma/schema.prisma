@@ -1,0 +1,228 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Achievement {
+  id          String           @id @default(uuid())
+  title       String
+  description String
+  icon        String
+  type        ACHIEVEMENT_TYPE
+  user        User             @relation(fields: [userId], references: [id])
+  userId      String
+  createdAt   DateTime         @default(now())
+
+  @@unique([userId, type])
+}
+
+model User {
+  id                String              @id @default(uuid())
+  email             String              @unique
+  fullname          String
+  password          String
+  role              USER_ROLES          @default(USER)
+  refreshToken      String?
+  avatar            String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  Course            Course[]
+  Enrollment        Enrollment[]
+  ProgressTracking  ProgressTracking[]
+  achievements      Achievement[]
+  authorshipRequest AuthorshipRequest[]
+  favoriteCourses   FavoriteCourse[]
+  Certificates Certificate[]
+  CompletionStatus CompletionStatus[]
+
+  @@map("users")
+}
+
+model Course {
+  id                 String   @id @default(uuid())
+  title              String
+  description        String
+  category           String
+  level              String
+  authorId           String
+  author             User     @relation(fields: [authorId], references: [id])
+  blocks             Block[]
+  sections           Section[]
+  favoritedBy        FavoriteCourse[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  Enrollment  Enrollment[]
+  CompletionStatus CompletionStatus[]
+  Certificates Certificate[]
+  coverImage         String?
+}
+
+model Block {
+  id                 String   @id @default(uuid())
+  title              String
+  content            String
+  order              Int
+  courseId           String
+  course             Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  test               Test?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  theoreticalMaterial String?
+  CompletionStatus CompletionStatus[]
+}
+
+model Test {
+  id           String     @id @default(uuid())
+  title        String
+  description  String?
+  passingScore Int
+  block        Block      @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  blockId      String     @unique
+  questions    Question[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Question {
+  id        String   @id @default(uuid())
+  question  String
+  test      Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  testId    String
+  options   Option[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Option {
+  id         String   @id @default(uuid())
+  text       String
+  isCorrect  Boolean
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Section {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  order       Int
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ProgressTracking ProgressTracking[]
+}
+
+model Task {
+  id              String   @id @default(uuid())
+  question        String
+  options         Json
+  correctAnswer   String
+  sectionId       String
+  section         Section  @relation(fields: [sectionId], references: [id])
+  completionStatus CompletionStatus[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Enrollment {
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  course     Course   @relation(fields: [courseId], references: [id])
+  courseId   String
+  enrolledAt DateTime @default(now())
+
+  @@id([userId, courseId])
+}
+
+model ProgressTracking {
+  id               String    @id @default(uuid())
+  user             User      @relation(fields: [userId], references: [id])
+  userId           String
+  section          Section   @relation(fields: [sectionId], references: [id])
+  sectionId        String
+  completionStatus Int       @default(0)
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@unique([userId, sectionId])
+}
+
+enum ACHIEVEMENT_TYPE {
+  COURSE_COMPLETION
+  PERFECT_SECTION
+  EARLY_ADOPTER
+  STREAK
+}
+
+enum USER_ROLES {
+  USER
+  ADMIN
+  AUTHOR
+}
+
+enum REQUEST_STATUS {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model AuthorshipRequest {
+  id        String         @id @default(uuid())
+  user      User           @relation(fields: [userId], references: [id])
+  userId    String
+  status    REQUEST_STATUS @default(PENDING)
+  message   String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model FavoriteCourse {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@id([userId, courseId])
+  @@map("favorite_courses")
+}
+
+model Certificate {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  issueDate DateTime @default(now())
+  pdfPath   String
+
+  @@id([userId, courseId])
+}
+
+model CompletionStatus {
+  id           String   @id @default(uuid()) @map("_id")
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  courseId     String?
+  course       Course?  @relation(fields: [courseId], references: [id])
+  blockId      String?
+  block        Block?   @relation(fields: [blockId], references: [id])
+  taskId       String?
+  task         Task?    @relation(fields: [taskId], references: [id])
+  isCompleted  Boolean  @default(false)
+  completedAt  DateTime @default(now())
+
+  @@unique([userId, courseId, blockId, taskId])
+}
+
+enum Role {
+  USER
+  ADMIN
+}

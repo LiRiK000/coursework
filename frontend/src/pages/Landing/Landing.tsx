@@ -1,83 +1,113 @@
-import { useAuthModal } from '@/features/Auth';
+import { AuthModalType, useAuth, useAuthModal } from '@/features/Auth';
+import { Menu } from '@/widgets/Menu';
+import {
+  Button,
+  Typography,
+  Layout,
+  Space,
+  Card,
+  Row,
+  Col,
+  Collapse,
+} from 'antd';
 import classes from './Landing.module.scss';
-import { Menu } from '@/shared/ui/Menu';
+import { faqItems, features } from './constants';
+import { useNavigate } from 'react-router-dom';
+
+const { Title, Paragraph, Text } = Typography;
+const { Content } = Layout;
+const { Panel } = Collapse;
 
 export const Landing = () => {
   const { openAuthModal } = useAuthModal();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
-  const handleClick = () => {
-    openAuthModal();
+  const handleStartLearning = () => {
+    if (isAuthenticated) {
+      navigate('/main');
+    } else {
+      openAuthModal(AuthModalType.LOGIN);
+    }
   };
 
   return (
-    <div className={classes.container}>
+    <Layout className={classes.layout}>
       <Menu />
-      {/* Hero Section */}
-      <section className={classes.hero}>
-        <div className={classes.heroContent}>
-          <h1>Открой новые горизонты знаний</h1>
-          <p>
-            Skill Horizon — это онлайн-платформа для обучения и тестирования
-            знаний. Развивай навыки, проходи курсы и проверяй свои знания в
-            интерактивном формате.
-          </p>
-          <button className={classes.getStarted} onClick={handleClick}>
-            Начать обучение
-          </button>
-        </div>
-        <div className={classes.heroImage}>
-          {/* Можно вставить изображение или иллюстрацию */}
-        </div>
-      </section>
+      <Content>
+        <Row
+          justify="space-between"
+          align="middle"
+          className={classes.hero}
+          gutter={[32, 32]}
+        >
+          <Col xs={24} md={12}>
+            <Space
+              direction="vertical"
+              size="large"
+              className={classes.heroContent}
+            >
+              <Title level={1} className={classes.heroTitle}>
+                Открой новые горизонты знаний
+              </Title>
+              <Paragraph className={classes.heroDescription}>
+                Skill Horizon — это инновационная платформа для обучения, где
+                каждый урок — это шаг к новым возможностям. Развивайте навыки,
+                которые действительно нужны в современном мире.
+              </Paragraph>
+              <Button
+                type="primary"
+                size="large"
+                onClick={handleStartLearning}
+                className={classes.ctaButton}
+              >
+                {isAuthenticated ? 'На главную' : 'Начать обучение'}
+              </Button>
+            </Space>
+          </Col>
+          <Col xs={24} md={12}>
+            <div className={classes.heroImage} />
+          </Col>
+        </Row>
 
-      {/* Особенности */}
-      <section id="features" className={classes.features}>
-        <h2>Особенности</h2>
-        <div className={classes.featureList}>
-          <div className={classes.featureItem}>
-            <h3>Интерактивное обучение</h3>
-            <p>Практические задания и тесты для закрепления знаний.</p>
-          </div>
-          <div className={classes.featureItem}>
-            <h3>Адаптивные курсы</h3>
-            <p>Программа, подстраивающаяся под ваш уровень подготовки.</p>
-          </div>
-          <div className={classes.featureItem}>
-            <h3>Система достижений</h3>
-            <p>Получай баллы, сертификаты и делись успехами с друзьями.</p>
-          </div>
-        </div>
-      </section>
+        <section id="features" className={classes.section}>
+          <Title level={2} className={classes.sectionTitle}>
+            Почему выбирают нас
+          </Title>
+          <Row gutter={[32, 32]} justify="center">
+            {features.map((feature, index) => (
+              <Col xs={24} sm={8} key={index}>
+                <Card hoverable className={classes.featureCard}>
+                  <div className={classes.featureIcon}>{feature.icon}</div>
+                  <Title level={3}>{feature.title}</Title>
+                  <Text>{feature.description}</Text>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </section>
 
-      {/* Курсы */}
-      <section id="courses" className={classes.courses}>
-        <h2>Популярные курсы</h2>
-        <div className={classes.courseList}>
-          <div className={classes.courseItem}>Основы программирования</div>
-          <div className={classes.courseItem}>Веб-разработка</div>
-          <div className={classes.courseItem}>Анализ данных</div>
-        </div>
-      </section>
-
-      {/* Тестирование */}
-      <section id="test" className={classes.test}>
-        <h2>Проверь свои знания</h2>
-        <p>Пройди тест и получи мгновенную обратную связь по результатам.</p>
-        <button className={classes.startTest}>Пройти тест</button>
-      </section>
-
-      {/* Footer */}
-      <footer id="contact" className={classes.footer}>
-        <p>
-          &copy; {new Date().getFullYear()} Skill Horizon. Все права защищены.
-        </p>
-        <div className={classes.footerNav}>
-          <a href="#features">Особенности</a>
-          <a href="#courses">Курсы</a>
-          <a href="#test">Тестирование</a>
-          <a href="#contact">Контакты</a>
-        </div>
-      </footer>
-    </div>
+        <section id="faq" className={classes.section}>
+          <Title level={2} className={classes.sectionTitle}>
+            Часто задаваемые вопросы
+          </Title>
+          <Row justify="center">
+            <Col xs={24} md={16}>
+              <Collapse
+                bordered={false}
+                className={classes.faqCollapse}
+                expandIconPosition="end"
+              >
+                {faqItems.map((item, index) => (
+                  <Panel header={item.question} key={index}>
+                    <Paragraph>{item.answer}</Paragraph>
+                  </Panel>
+                ))}
+              </Collapse>
+            </Col>
+          </Row>
+        </section>
+      </Content>
+    </Layout>
   );
 };
